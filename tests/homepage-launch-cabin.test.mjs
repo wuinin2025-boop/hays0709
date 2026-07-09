@@ -1,0 +1,32 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const html = readFileSync(new URL("../瀚纳仕H5 demo-启动舱.html", import.meta.url), "utf8");
+const legacy = readFileSync(new URL("../瀚纳仕H5 demo.html", import.meta.url), "utf8");
+
+assert.match(html, /<section class="screen home-screen home-screen--launch-cabin is-active" id="homeScreen">/);
+assert.match(html, /<h1 aria-label="今天的班 先让AI给你起一卦">/);
+assert.match(html, /<span data-title="今天的班" aria-hidden="true">今天的班<\/span>/);
+assert.match(html, /<span data-title="先让AI给你起一卦" aria-hidden="true">先让AI给你起一卦<\/span>/);
+assert.doesNotMatch(html, /data-title="今天的班，"/);
+assert.doesNotMatch(html, /先让 AI 给你起一卦/);
+assert.match(html, /font-size: 64px;/);
+assert.match(html, /font-size: 68px;/);
+assert.doesNotMatch(html, /<h1[^>]*>.*启动舱.*<\/h1>/s);
+assert.match(html, /<div class="home-projection-beam" aria-hidden="true">/);
+assert.match(html, /<span class="orbit-ring ring-one" aria-hidden="true"><\/span>/);
+assert.match(html, /<span class="data-rain rain-one" aria-hidden="true"><\/span>/);
+assert.match(html, /<div class="home-title-panel">/);
+assert.match(html, /<div class="subhead-panel">/);
+assert.match(html, /<span class="subhead-line">报上打工代号和出生坐标<\/span>/);
+assert.match(html, /<span class="subhead-line">看看你最近进的是<span class="subhead-key">搞钱局<\/span>、<span class="subhead-key">贵人局<\/span>，还是<span class="subhead-key">水逆闪避局<\/span>。<\/span>/);
+assert.match(html, /--title-fill: #ffffff;/);
+assert.match(html, /<span class="music-glyph" aria-hidden="true">♪<\/span>/);
+assert.doesNotMatch(html, /<span class="speaker-icon"/);
+assert.doesNotMatch(html, /speaker-wave/);
+assert.match(html, /@keyframes beamCast/);
+assert.match(html, /@keyframes orbitSweep/);
+assert.match(html, /@keyframes dataRain/);
+assert.match(html, /@keyframes musicGlyphPulse/);
+assert.match(html, /history\.scrollRestoration = "manual";/);
+assert.doesNotMatch(legacy, /home-screen--launch-cabin/);

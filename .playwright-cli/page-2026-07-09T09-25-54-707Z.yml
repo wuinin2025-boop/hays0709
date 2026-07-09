@@ -1,0 +1,14 @@
+- main [ref=f1e2]:
+  - generic [ref=f1e3]:
+    - generic [ref=f1e5]:
+      - img "Hays" [ref=f1e6]
+      - button "开启音乐" [ref=f1e7] [cursor=pointer]
+    - generic:
+      - generic [ref=f1e12]:
+        - heading "今天的班，先让 AI 给你起一卦" [level=1] [ref=f1e14]:
+          - generic [ref=f1e15]: 今天的班，先让 AI 今天的班，先让 AI 今天的班，先让 AI
+          - generic [ref=f1e16]: 给你起一卦 给你起一卦 给你起一卦
+        - paragraph [ref=f1e17]: 报上打工代号和出生坐标，看看你最近进的是搞钱局、贵人局，还是水逆闪避局。
+      - generic [ref=f1e18]:
+        - button "先抽一签" [ref=f1e20] [cursor=pointer]
+        - paragraph [ref=f1e21]: 娱乐玄学，认真转运｜适合发给同频打工人

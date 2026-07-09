@@ -1,0 +1,11 @@
+- main [ref=f1e2]:
+  - generic [ref=f1e3]:
+    - generic [ref=f1e5]:
+      - img "Hays" [ref=f1e6]
+      - button "关闭音乐" [active] [pressed] [ref=f1e16] [cursor=pointer]
+    - generic [ref=f1e9]:
+      - generic [ref=f1e10]: AI 打工命盘
+      - heading "今天的班，先让 AI 给你起一卦" [level=1] [ref=f1e11]
+      - paragraph [ref=f1e12]: 报上打工代号和出生坐标，看看你最近进的是搞钱局、贵人局，还是水逆闪避局。
+      - button "先抽一签" [ref=f1e14] [cursor=pointer]
+      - paragraph [ref=f1e15]: 娱乐玄学，认真转运｜适合发给同频打工人

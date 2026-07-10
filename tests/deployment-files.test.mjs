@@ -15,7 +15,7 @@ for (const flag of ["--domain", "--branch", "--repo-url", "--https", "--email", 
   assert.match(deploy, new RegExp(flag.replaceAll("-", "\\-")), `${flag} should be documented by the script`);
 }
 
-assert.match(deploy, /\/opt\/hays0709\/releases/);
+assert.match(deploy, /RELEASES_DIR=.*releases/);
 assert.match(deploy, /current/);
 assert.match(deploy, /previous/);
 assert.match(deploy, /nginx -t/);

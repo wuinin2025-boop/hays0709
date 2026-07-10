@@ -290,7 +290,7 @@ install_nginx_config() {
 }
 
 ensure_nginx_api_proxy() {
-    grep -Fq 'location = /api/fortune' "$CONFIG_PATH" && return 0
+    grep -Fq 'location ^~ /api/fortune' "$CONFIG_PATH" && return 0
 
     local candidate="$TMP_ROOT/nginx.conf.with-api"
     local backup="$APP_ROOT/config-backups/nginx-before-api-$(date -u +%Y%m%d%H%M%S).conf"
@@ -301,9 +301,9 @@ import sys
 source_path, target_path = map(Path, sys.argv[1:])
 source = source_path.read_text(encoding="utf-8")
 needle = "    location / {"
-if needle not in source:
-    raise SystemExit("managed Nginx config has no application location block")
-proxy = """    location = /api/fortune {
+exact_proxy = "    location = /api/fortune {"
+prefix_proxy = "    location ^~ /api/fortune {"
+proxy = """    location ^~ /api/fortune {
         proxy_pass http://127.0.0.1:5173;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
@@ -316,7 +316,13 @@ proxy = """    location = /api/fortune {
     }
 
 """
-target_path.write_text(source.replace(needle, proxy + needle, 1), encoding="utf-8")
+if exact_proxy in source:
+    upgraded = source.replace(exact_proxy, prefix_proxy, 1)
+elif needle in source:
+    upgraded = source.replace(needle, proxy + needle, 1)
+else:
+    raise SystemExit("managed Nginx config has no application location block")
+target_path.write_text(upgraded, encoding="utf-8")
 PY
     cp -a "$CONFIG_PATH" "$backup"
     install -m 644 "$candidate" "$CONFIG_PATH"
@@ -421,11 +427,10 @@ api_proxy_health_check() {
     local attempt status
     for attempt in $(seq 1 20); do
         status="$(curl --silent --show-error --max-time 2 \
-            --request OPTIONS \
             --output /dev/null \
             --write-out '%{http_code}' \
-            'http://127.0.0.1:5173/api/fortune' 2>/dev/null || true)"
-        [[ "$status" == "204" ]] && return 0
+            'http://127.0.0.1:5173/api/fortune/status' 2>/dev/null || true)"
+        [[ "$status" == "200" ]] && return 0
         sleep 1
     done
     return 1
@@ -508,20 +513,36 @@ public_api_health_check() {
     local status
     if nginx_is_https; then
         status="$(curl --silent --show-error --max-time 15 \
-            --request OPTIONS \
             --resolve "$DOMAIN:443:127.0.0.1" \
             --output /dev/null \
             --write-out '%{http_code}' \
-            "https://$DOMAIN/api/fortune")" || return 1
+            "https://$DOMAIN/api/fortune/status")" || return 1
     else
         status="$(curl --silent --show-error --max-time 15 \
-            --request OPTIONS \
             --resolve "$DOMAIN:80:127.0.0.1" \
             --output /dev/null \
             --write-out '%{http_code}' \
-            "http://$DOMAIN/api/fortune")" || return 1
+            "http://$DOMAIN/api/fortune/status")" || return 1
     fi
-    [[ "$status" == "204" ]]
+    [[ "$status" == "200" ]]
+}
+
+report_ai_configuration() {
+    local response
+    if nginx_is_https; then
+        response="$(curl --silent --show-error --max-time 15 \
+            --resolve "$DOMAIN:443:127.0.0.1" \
+            "https://$DOMAIN/api/fortune/status" 2>/dev/null || true)"
+    else
+        response="$(curl --silent --show-error --max-time 15 \
+            --resolve "$DOMAIN:80:127.0.0.1" \
+            "http://$DOMAIN/api/fortune/status" 2>/dev/null || true)"
+    fi
+    if grep -Fq '"configured":true' <<< "$response"; then
+        log "AI generation is configured"
+    else
+        log "WARNING: AI proxy is reachable, but HAYS_AI_API_KEY is not configured in $ENV_PATH" >&2
+    fi
 }
 
 verify_site() {
@@ -534,9 +555,10 @@ verify_site() {
         return 1
     fi
     if ! public_api_health_check; then
-        log "API proxy health check failed; expected OPTIONS /api/fortune to return HTTP 204" >&2
+        log "API proxy health check failed; expected GET /api/fortune/status to return HTTP 200" >&2
         return 1
     fi
+    report_ai_configuration
 }
 
 backup_config_for_certbot() {

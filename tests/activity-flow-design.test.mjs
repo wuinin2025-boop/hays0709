@@ -120,7 +120,13 @@ assert.match(html, /@keyframes shareArrowFloat/);
 assert.match(html, /function openShareGuide\(\)/);
 assert.match(html, /分享好友[\s\S]*openShareGuide\(\);/);
 assert.match(html, /data-long-press-save="poster"/);
-assert.equal(existsSync(new URL("../assets/poster-result-template.png", import.meta.url)), true, "poster template image should exist");
+const posterTemplatePaths = Array.from(
+  { length: 9 },
+  (_, index) => `../assets/posters/poster-${String(index + 1).padStart(2, "0")}.png`
+);
+posterTemplatePaths.forEach(relativePath => {
+  assert.equal(existsSync(new URL(relativePath, import.meta.url)), true, `${relativePath} should exist`);
+});
 assert.match(html, /\.poster-card \{\n[\s\S]*?min-height: 960px;[\s\S]*?grid-template-rows: auto;[\s\S]*?border: 1px solid rgba\(200, 251, 232, \.52\);[\s\S]*?border-radius: 28px;/);
 assert.match(html, /\.poster-qr-block \{\n[\s\S]*?grid-template-columns: 1fr;[\s\S]*?justify-items: center;/);
 assert.doesNotMatch(html, /\.poster-qr-block::before/);
@@ -142,11 +148,16 @@ assert.match(html, /function renderPosterQrWithQRCodeJs\(shareUrl\)/);
 assert.match(html, /new QRCode\(holder,/);
 assert.doesNotMatch(html, /function drawFallbackQr/);
 assert.match(html, /function renderPosterImage\(report\)/);
-assert.match(html, /const POSTER_TEMPLATE_SRC = "assets\/poster-result-template\.png";/);
-assert.match(html, /posterTemplateImage\.src = POSTER_TEMPLATE_SRC;/);
-assert.match(html, /drawPosterTemplate\(context, width, height\);/);
+assert.match(html, /const POSTER_TEMPLATE_SOURCES = \[/);
+assert.match(html, /assets\/posters\/poster-01\.png/);
+assert.match(html, /assets\/posters\/poster-09\.png/);
+assert.match(html, /const posterTemplateImages = POSTER_TEMPLATE_SOURCES\.map/);
+assert.match(html, /function selectPosterTemplate\(report = \{\}\)/);
+assert.match(html, /function getPosterTemplateKey\(report = \{\}\)/);
+assert.match(html, /const posterTemplateImage = selectPosterTemplate\(report\);/);
+assert.match(html, /drawPosterTemplate\(context, posterTemplateImage, width, height\);/);
 assert.match(html, /drawPosterLogo\(context, 48, 48, 156, 39\);/);
-assert.match(html, /function drawPosterTemplate\(context, width, height\)/);
+assert.match(html, /function drawPosterTemplate\(context, image, width, height\)/);
 assert.match(html, /function getPosterScene\(report = \{\}\)/);
 assert.match(html, /function renderPosterScene\(report\)/);
 assert.match(html, /function drawPosterScene\(context, scene, x, y, width, height\)/);

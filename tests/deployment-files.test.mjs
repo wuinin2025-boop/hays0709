@@ -65,7 +65,7 @@ for (const flag of ["--domain", "--x-ui-db", "--http1-port", "--http2-port"]) {
   assert.match(xrayFallback, new RegExp(flag.replaceAll("-", "\\-")), `${flag} should be supported by the Xray helper`);
 }
 
-assert.match(xrayFallback, /location = \/api\/fortune/);
+assert.match(xrayFallback, /location \^~ \/api\/fortune/);
 assert.match(xrayFallback, /proxy_pass http:\/\/127\.0\.0\.1:5173/);
 
 for (const marker of [
@@ -94,7 +94,7 @@ for (const placeholder of ["__DOMAIN__", "__SITE_ROOT__", "__INDEX_FILE__"]) {
 }
 
 assert.match(nginx, /gzip on;/);
-assert.match(nginx, /location = \/api\/fortune/);
+assert.match(nginx, /location \^~ \/api\/fortune/);
 assert.match(nginx, /proxy_pass http:\/\/127\.0\.0\.1:5173/);
 assert.match(nginx, /proxy_read_timeout 60s/);
 assert.match(nginx, /Cache-Control/);
@@ -130,3 +130,5 @@ for (const documentationMarker of [
 ]) {
   assert.match(readme, new RegExp(documentationMarker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), `${documentationMarker} should be documented`);
 }
+
+assert.match(xrayFallback, /location \^~ \/api\/fortune/);

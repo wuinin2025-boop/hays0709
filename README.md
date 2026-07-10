@@ -27,6 +27,14 @@ node server.mjs
 
 如果没有配置密钥，页面会自动回退到本地内置文案，流程不会中断。
 
+可以用状态接口确认线上是否真的启用了模型调用：
+
+```bash
+curl https://你的域名/api/fortune/status
+```
+
+`"configured":true` 表示服务端已经读到密钥；`false` 表示页面仍会使用本地兜底。状态接口只返回配置状态、服务商类型和模型名，不会返回密钥。
+
 ## Ubuntu + Nginx 部署
 
 仓库提供 `scripts/deploy.sh`，适用于 Ubuntu 22.04 及更新版本。脚本会从 GitHub 拉取指定分支/标签，使用时间戳 release 目录发布到 `/opt/hays0709`，再原子切换 `current` 软链接。Nginx 始终指向这个稳定软链接，因此更新过程中不会暴露半套文件。
@@ -60,6 +68,8 @@ HAYS_AI_API_KEY=replace-with-your-key
 ```
 
 不要提交这个服务器环境文件。没有配置密钥时，`/api/fortune` 会返回未配置状态，前端自动使用本地兜底文案，页面仍可正常访问。
+
+部署结束时脚本会检查 `/api/fortune/status`。代理可访问但密钥缺失时会输出明确警告，不再把 `OPTIONS 204` 当作“AI 已配置”的依据。
 
 ### 首次部署 HTTP
 

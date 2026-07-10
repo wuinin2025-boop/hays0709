@@ -4136,6 +4136,9 @@
     const REPORT_ACTION = "更多打工情报";
     const AI_FORTUNE_ENDPOINT = "/api/fortune";
     const AI_FORTUNE_TIMEOUT_MS = 45000;
+    const LOADING_PROGRESS_CEILING = 88;
+    const LOADING_PROGRESS_TICK_MS = 360;
+    const LOADING_COMPLETE_DELAY_MS = 360;
     const loadingMessages = [
       "正在校准你的班味浓度...",
       "正在查询贵人是否在线...",
@@ -4202,9 +4205,18 @@
     const posterQrCanvas = document.querySelector("#posterQrCanvas");
     const posterSaveImage = document.querySelector("#posterSaveImage");
     const posterLogo = document.querySelector("#posterLogo");
-    const POSTER_TEMPLATE_SRC = "assets/poster-result-template.png";
-    const posterTemplateImage = new Image();
-    posterTemplateImage.src = POSTER_TEMPLATE_SRC;
+    const POSTER_TEMPLATE_SOURCES = [
+      "assets/posters/poster-01.png",
+      "assets/posters/poster-02.png",
+      "assets/posters/poster-03.png",
+      "assets/posters/poster-04.png",
+      "assets/posters/poster-05.png",
+      "assets/posters/poster-06.png",
+      "assets/posters/poster-07.png",
+      "assets/posters/poster-08.png",
+      "assets/posters/poster-09.png"
+    ];
+    const posterTemplateImages = POSTER_TEMPLATE_SOURCES.map(source => ({ source, image: null }));
     const LONG_PRESS_MS = 650;
     const MUSIC_VOLUME = 0.42;
     const SFX_VOLUME = 0.26;
@@ -5006,6 +5018,7 @@
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
       const action = report.actions?.[0] || "让入口可见";
+      const posterTemplateImage = selectPosterTemplate(report);
 
       return Promise.all([
         loadPosterAsset(posterTemplateImage),
@@ -5020,7 +5033,7 @@
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = "high";
 
-        drawPosterTemplate(context, width, height);
+        drawPosterTemplate(context, posterTemplateImage, width, height);
         drawPosterLogo(context, 48, 48, 156, 39);
         drawPosterPersonalLabel(context, "你的职场玄学人格", width / 2, 370);
         drawFitText(context, report.personaName, width / 2, 430, 64, 38, width - 96);
@@ -5031,6 +5044,36 @@
         posterSaveImage.src = canvas.toDataURL("image/png");
         posterArea.classList.add("is-save-ready");
       });
+    }
+
+    function getPosterTemplateKey(report = {}) {
+      return [
+        report.personaName,
+        report.personaSubline,
+        report.insight,
+        report.drawName,
+        report.drawOracle,
+        ...(Array.isArray(report.actions) ? report.actions : []),
+        report.scores?.career,
+        report.scores?.timing,
+        report.scores?.interview,
+        report.scores?.salary
+      ].filter(value => value !== undefined && value !== null).join("|");
+    }
+
+    function selectPosterTemplate(report = {}) {
+      const key = getPosterTemplateKey(report) || "hays-poster";
+      let hash = 2166136261;
+      for (const character of key) {
+        hash ^= character.codePointAt(0);
+        hash = Math.imul(hash, 16777619);
+      }
+      const template = posterTemplateImages[(hash >>> 0) % posterTemplateImages.length];
+      if (!template.image) {
+        template.image = new Image();
+        template.image.src = template.source;
+      }
+      return template.image;
     }
 
     function loadPosterAsset(image) {
@@ -5050,17 +5093,17 @@
       });
     }
 
-    function drawPosterTemplate(context, width, height) {
-      if (!posterTemplateImage.complete || !posterTemplateImage.naturalWidth) {
+    function drawPosterTemplate(context, image, width, height) {
+      if (!image?.complete || !image.naturalWidth) {
         drawPosterBackground(context, width, height);
         return;
       }
 
-      const scale = Math.max(width / posterTemplateImage.naturalWidth, height / posterTemplateImage.naturalHeight);
-      const drawWidth = posterTemplateImage.naturalWidth * scale;
-      const drawHeight = posterTemplateImage.naturalHeight * scale;
+      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+      const drawWidth = image.naturalWidth * scale;
+      const drawHeight = image.naturalHeight * scale;
       context.drawImage(
-        posterTemplateImage,
+        image,
         (width - drawWidth) / 2,
         (height - drawHeight) / 2,
         drawWidth,
@@ -5889,31 +5932,52 @@
       return "别只转发好运，也要给好运留一个能找到你的入口。";
     }
 
-    async function runLoading() {
-      const runId = ++loadingRunId;
-      let index = 0;
+    function startLoadingProgress(runId) {
       const text = document.querySelector("#loadingText");
       const fill = document.querySelector("#loadingFill");
-      const reportPromise = buildReport();
+      let progress = 8;
+      let tick = 0;
+
       text.textContent = loadingMessages[0];
-      fill.style.width = "8%";
+      fill.style.width = `${progress}%`;
 
-      await new Promise(resolve => {
-        const timer = setInterval(() => {
-          index += 1;
-          const progress = Math.min(100, (index + 1) * 20);
-          fill.style.width = `${progress}%`;
-          text.textContent = loadingMessages[Math.min(index, loadingMessages.length - 1)];
+      const timer = setInterval(() => {
+        if (runId !== loadingRunId) {
+          clearInterval(timer);
+          return;
+        }
 
-          if (index >= loadingMessages.length) {
-            clearInterval(timer);
-            resolve();
-          }
-        }, 760);
-      });
+        tick += 1;
+        const remaining = LOADING_PROGRESS_CEILING - progress;
+        const pace = progress < 55 ? 0.16 : progress < 75 ? 0.1 : 0.055;
+        progress = Math.min(
+          LOADING_PROGRESS_CEILING,
+          progress + Math.max(0.35, remaining * pace)
+        );
+        fill.style.width = `${progress.toFixed(1)}%`;
+        text.textContent = loadingMessages[Math.min(Math.floor(tick / 4), loadingMessages.length - 1)];
+      }, LOADING_PROGRESS_TICK_MS);
 
+      return { fill, text, timer };
+    }
+
+    async function finishLoadingProgress(progressState, runId) {
+      clearInterval(progressState.timer);
+      if (runId !== loadingRunId) return false;
+
+      progressState.text.textContent = "命盘已生成，正在开盘...";
+      progressState.fill.style.width = "100%";
+      await new Promise(resolve => setTimeout(resolve, LOADING_COMPLETE_DELAY_MS));
+      return runId === loadingRunId;
+    }
+
+    async function runLoading() {
+      const runId = ++loadingRunId;
+      const progressState = startLoadingProgress(runId);
+      const reportPromise = buildReport();
       const report = await reportPromise;
-      if (runId !== loadingRunId) return;
+
+      if (!await finishLoadingProgress(progressState, runId)) return;
       renderReport(report);
       showScreen("reportScreen");
     }

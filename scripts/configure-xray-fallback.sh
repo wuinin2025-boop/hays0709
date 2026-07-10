@@ -191,7 +191,7 @@ server {
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
-    location = /api/fortune {
+    location ^~ /api/fortune {
         proxy_pass http://127.0.0.1:5173;
         proxy_http_version 1.1;
         proxy_set_header Host \$host;

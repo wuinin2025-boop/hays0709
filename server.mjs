@@ -29,6 +29,10 @@ const mimeTypes = new Map([
 createServer(async (request, response) => {
   try {
     const url = new URL(request.url || "/", `http://${request.headers.host || "127.0.0.1"}`);
+    if (url.pathname === "/api/fortune/status") {
+      handleFortuneStatusRequest(request, response);
+      return;
+    }
     if (url.pathname === "/api/fortune") {
       await handleFortuneRequest(request, response);
       return;
@@ -42,6 +46,29 @@ createServer(async (request, response) => {
   console.log(`Hays server is running at http://${host}:${port}/`);
 });
 
+function getAiApiKey() {
+  return process.env.HAYS_AI_API_KEY || process.env.DEEPSEEK_API_KEY || process.env.AI_API_KEY || "";
+}
+
+function handleFortuneStatusRequest(request, response) {
+  if (request.method === "OPTIONS") {
+    response.writeHead(204, corsHeaders());
+    response.end();
+    return;
+  }
+
+  if (request.method !== "GET") {
+    sendJson(response, 405, { error: "Method not allowed" });
+    return;
+  }
+
+  sendJson(response, 200, {
+    configured: Boolean(getAiApiKey()),
+    provider: "deepseek-compatible",
+    model
+  });
+}
+
 async function handleFortuneRequest(request, response) {
   if (request.method === "OPTIONS") {
     response.writeHead(204, corsHeaders());
@@ -54,9 +81,12 @@ async function handleFortuneRequest(request, response) {
     return;
   }
 
-  const apiKey = process.env.HAYS_AI_API_KEY || process.env.DEEPSEEK_API_KEY || process.env.AI_API_KEY;
+  const apiKey = getAiApiKey();
   if (!apiKey) {
-    sendJson(response, 503, { error: "AI API key is not configured" });
+    sendJson(response, 503, {
+      error: "AI API key is not configured",
+      code: "AI_API_KEY_MISSING"
+    });
     return;
   }
 
@@ -86,7 +116,11 @@ async function handleFortuneRequest(request, response) {
     const data = await aiResponse.json().catch(() => ({}));
     if (!aiResponse.ok) {
       console.error(`AI provider returned ${aiResponse.status}`);
-      sendJson(response, 502, { error: "AI provider request failed", providerStatus: aiResponse.status });
+      sendJson(response, 502, {
+        error: "AI provider request failed",
+        code: "AI_PROVIDER_ERROR",
+        providerStatus: aiResponse.status
+      });
       return;
     }
 
@@ -99,7 +133,10 @@ async function handleFortuneRequest(request, response) {
     });
   } catch (error) {
     console.error(`AI fortune request failed: ${error?.name || "Error"}`);
-    sendJson(response, 502, { error: "AI provider request failed" });
+    sendJson(response, 502, {
+      error: "AI provider request failed",
+      code: "AI_PROVIDER_ERROR"
+    });
   }
 }
 
@@ -265,7 +302,7 @@ async function serveStatic(pathname, response) {
 function corsHeaders(extra = {}) {
   return {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     ...extra
   };

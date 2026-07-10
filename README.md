@@ -1,10 +1,37 @@
 # 瀚纳仕 AI 打工命盘 H5
 
-这是一个纯静态 H5 项目，生产入口为 `瀚纳仕H5 demo-启动舱.html`，运行时依赖只有两个 HTML 页面和 `assets/` 图片资源。不需要 Node.js、数据库或后端服务。
+这是一个瀚纳仕 AI 打工命盘 H5 项目，生产入口为 `瀚纳仕H5 demo-启动舱.html`。页面可以在没有接口时使用本地兜底文案；如果要让“AI 算卦”每次生成不同标题和内容，需要通过 `server.mjs` 启动同源 API 代理，由服务端读取 API Key 后请求模型接口。
+
+不要把 API Key 写进 HTML、脚本或 Git 仓库。请在服务器环境变量里配置密钥，本仓库只保留 `.env.example` 占位示例。
+
+## 本地 AI 预览
+
+Node.js 18+ 可以直接运行内置代理服务：
+
+```bash
+export HAYS_AI_API_KEY="replace-with-your-key"
+export HOST="0.0.0.0"
+node server.mjs
+```
+
+服务默认只监听 `127.0.0.1:5173`。需要手机同网段直接预览时，临时设置 `HOST=0.0.0.0`，再访问电脑局域网 IP 的 `5173` 端口。
+
+可选环境变量：
+
+- `HAYS_AI_API_KEY`：模型 API Key；也兼容 `DEEPSEEK_API_KEY` 和 `AI_API_KEY`。
+- `HAYS_AI_API_BASE_URL`：默认 `https://api.deepseek.com`。
+- `HAYS_AI_MODEL`：默认 `deepseek-v4-flash`。
+- `HAYS_AI_TIMEOUT_MS`：模型接口超时时间，默认 `45000`。
+- `HOST`：监听地址，默认 `127.0.0.1`；生产环境由 Nginx 反代，不需要直接暴露 `5173`。
+- `PORT`：默认 `5173`。
+
+如果没有配置密钥，页面会自动回退到本地内置文案，流程不会中断。
 
 ## Ubuntu + Nginx 部署
 
 仓库提供 `scripts/deploy.sh`，适用于 Ubuntu 22.04 及更新版本。脚本会从 GitHub 拉取指定分支/标签，使用时间戳 release 目录发布到 `/opt/hays0709`，再原子切换 `current` 软链接。Nginx 始终指向这个稳定软链接，因此更新过程中不会暴露半套文件。
+
+部署脚本会自动安装 Node.js 22（服务器已有 Node.js 18+ 时复用现有版本），注册 `hays0709.service` 常驻运行 `server.mjs`，并让 Nginx 把 `/api/fortune` 反代到本机 `127.0.0.1:5173`。页面文件和 AI 接口因此使用同一个域名访问，服务器不需要向公网开放 `5173`。
 
 ### 部署前准备
 
@@ -16,6 +43,23 @@
 - 如果仓库是私有仓库，服务器已经配置 GitHub Deploy Key 或其他 Git 凭据。不要把凭据写进脚本或仓库。
 
 脚本首次运行会自动安装 `git`、`nginx`、`rsync` 和 `curl`。执行 HTTPS 部署时，还会安装 `certbot` 和 `python3-certbot-nginx`。
+
+### 配置 AI 密钥
+
+首次部署会创建仅 `root` 和 `www-data` 可读的 `/etc/hays0709.env`。编辑该文件填入真实密钥：
+
+```bash
+sudo nano /etc/hays0709.env
+sudo systemctl restart hays0709
+```
+
+至少配置：
+
+```dotenv
+HAYS_AI_API_KEY=replace-with-your-key
+```
+
+不要提交这个服务器环境文件。没有配置密钥时，`/api/fortune` 会返回未配置状态，前端自动使用本地兜底文案，页面仍可正常访问。
 
 ### 首次部署 HTTP
 
@@ -102,8 +146,12 @@ sudo bash scripts/deploy.sh --domain example.com --rollback
 ```bash
 sudo nginx -t
 sudo systemctl status nginx --no-pager
+sudo systemctl status hays0709 --no-pager
 sudo systemctl is-active nginx
+sudo systemctl is-active hays0709
 sudo journalctl -u nginx -e --no-pager
+sudo journalctl -u hays0709 -e --no-pager
+curl -i -X OPTIONS http://127.0.0.1:5173/api/fortune
 ls -la /opt/hays0709
 ls -la /opt/hays0709/releases
 ```
@@ -117,12 +165,15 @@ ls -la /opt/hays0709/releases
 - **提示 `Port 443 is occupied`**：使用 `sudo ss -ltnp | grep ':443'` 确认占用者。如果是 x-ui/Xray，请按上面的共存步骤运行 `scripts/configure-xray-fallback.sh`，不要停止仍有代理客户端使用的 Xray。
 - **提示 `server_name` 不一致**：脚本不会覆盖同名但非本项目管理的配置。请先检查 `/etc/nginx/sites-available/hays0709.conf`，确认域名后再运行。
 - **更新失败**：脚本在健康检查失败时会恢复原来的 `current`。检查 Nginx 日志和 `/opt/hays0709/releases` 后，可再次执行 `--rollback`。
+- **页面正常但 AI 一直使用兜底内容**：检查 `/etc/hays0709.env` 中的 `HAYS_AI_API_KEY`，再运行 `sudo systemctl restart hays0709` 和 `sudo journalctl -u hays0709 -e --no-pager`。
+- **`/api/fortune` 返回 502**：先确认 `sudo systemctl is-active hays0709`，再用 `curl -i -X OPTIONS http://127.0.0.1:5173/api/fortune` 检查本机 Node 服务。
 
 ## 本地检查
 
 仓库中的页面断言测试可以直接运行：
 
 ```bash
+node tests/ai-fortune-api.test.mjs
 node tests/homepage-launch-cabin.test.mjs
 node tests/homepage-structure.test.mjs
 node tests/activity-flow-design.test.mjs

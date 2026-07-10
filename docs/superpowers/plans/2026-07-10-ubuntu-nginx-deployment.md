@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a repeatable Ubuntu/Nginx deployment path for the static H5, document its operation, and verify the deployment contract before pushing it.
+**Goal:** Add a repeatable Ubuntu/Nginx deployment path for the H5 and its same-origin AI proxy, document its operation, and verify the deployment contract before pushing it.
 
-**Architecture:** A Bash script shallow-clones the selected Git ref into a temporary directory, validates and publishes only the H5 runtime files into timestamped releases under `/opt/hays0709`, then atomically swaps the `current` symlink. An Nginx template serves that stable symlink, while Certbot is an optional, noninteractive HTTPS step that preserves existing managed TLS configuration.
+**Architecture:** A Bash script shallow-clones the selected Git ref into a temporary directory, validates and publishes the H5 runtime files plus `server.mjs` into timestamped releases under `/opt/hays0709`, then atomically swaps the `current` symlink. Nginx serves the stable symlink and proxies `/api/fortune` to a loopback systemd service, while Certbot remains an optional HTTPS step.
 
-**Tech Stack:** Bash, Ubuntu `apt`/`systemd`, Git, rsync, Nginx, curl, optional Certbot, Node.js assertion tests.
+**Tech Stack:** Bash, Ubuntu `apt`/`systemd`, Git, rsync, Nginx, Node.js 18+, curl, optional Certbot, Node.js assertion tests.
 
 ---
 

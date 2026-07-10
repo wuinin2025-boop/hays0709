@@ -1,3 +1,7 @@
 .worktrees/
 .playwright-cli/
 output/playwright/
+.DS_Store
+.env
+.env.*
+!.env.example

@@ -15,6 +15,10 @@ readonly CONFIG_PATH="${CONFIG_DIR}/${SITE_NAME}.conf"
 readonly ENABLED_LINK="${ENABLED_DIR}/${SITE_NAME}.conf"
 readonly INDEX_FILE="瀚纳仕H5 demo-启动舱.html"
 readonly TEMPLATE_FILE_NAME="deploy/nginx.conf.template"
+readonly SERVICE_TEMPLATE_FILE_NAME="deploy/hays0709.service.template"
+readonly SERVICE_NAME="${SITE_NAME}.service"
+readonly SERVICE_PATH="/etc/systemd/system/${SERVICE_NAME}"
+readonly ENV_PATH="/etc/${SITE_NAME}.env"
 
 DOMAIN=""
 BRANCH="main"
@@ -141,7 +145,7 @@ require_ubuntu() {
 }
 
 ensure_packages() {
-    local required=(git nginx rsync curl iproute2)
+    local required=(git nginx rsync curl iproute2 python3 ca-certificates)
 
     local missing=()
     local package
@@ -164,6 +168,28 @@ ensure_packages() {
     command -v curl >/dev/null || die "curl is unavailable"
     command -v ss >/dev/null || die "ss is unavailable"
     command -v systemctl >/dev/null || die "systemd/systemctl is required"
+}
+
+ensure_node_runtime() {
+    local current_major=0
+    if command -v node >/dev/null 2>&1; then
+        current_major="$(node -p 'Number(process.versions.node.split(".")[0])' 2>/dev/null || printf '0')"
+    fi
+    if [[ "$current_major" =~ ^[0-9]+$ && "$current_major" -ge 18 ]]; then
+        return 0
+    fi
+
+    log "installing Node.js 22 runtime"
+    local setup_script="$TMP_ROOT/nodesource-setup.sh"
+    curl --fail --silent --show-error --location \
+        https://deb.nodesource.com/setup_22.x \
+        --output "$setup_script"
+    bash "$setup_script"
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get install -y nodejs
+    command -v node >/dev/null || die "Node.js installation failed"
+    [[ "$(node -p 'Number(process.versions.node.split(".")[0])')" -ge 18 ]] \
+        || die "Node.js 18 or newer is required"
 }
 
 ensure_https_packages() {
@@ -247,6 +273,7 @@ install_nginx_config() {
             || die "$CONFIG_PATH exists but is not managed by this deployment"
         grep -Eq "server_name[[:space:]]+[^;]*${DOMAIN}([[:space:]]|;)" "$CONFIG_PATH" \
             || die "$CONFIG_PATH has a different server_name; resolve it manually before deploying"
+        ensure_nginx_api_proxy
         ensure_nginx_site_link
         return
     fi
@@ -259,6 +286,44 @@ install_nginx_config() {
     if ! nginx -t; then
         rm -f -- "$ENABLED_LINK" "$CONFIG_PATH"
         die "generated Nginx configuration failed validation"
+    fi
+}
+
+ensure_nginx_api_proxy() {
+    grep -Fq 'location = /api/fortune' "$CONFIG_PATH" && return 0
+
+    local candidate="$TMP_ROOT/nginx.conf.with-api"
+    local backup="$APP_ROOT/config-backups/nginx-before-api-$(date -u +%Y%m%d%H%M%S).conf"
+    python3 - "$CONFIG_PATH" "$candidate" <<'PY'
+from pathlib import Path
+import sys
+
+source_path, target_path = map(Path, sys.argv[1:])
+source = source_path.read_text(encoding="utf-8")
+needle = "    location / {"
+if needle not in source:
+    raise SystemExit("managed Nginx config has no application location block")
+proxy = """    location = /api/fortune {
+        proxy_pass http://127.0.0.1:5173;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+    }
+
+"""
+target_path.write_text(source.replace(needle, proxy + needle, 1), encoding="utf-8")
+PY
+    cp -a "$CONFIG_PATH" "$backup"
+    install -m 644 "$candidate" "$CONFIG_PATH"
+    if ! nginx -t; then
+        install -m 644 "$backup" "$CONFIG_PATH"
+        nginx -t || true
+        die "Nginx API proxy upgrade failed validation; restored the previous configuration"
     fi
 }
 
@@ -291,6 +356,8 @@ clone_source() {
     [[ -f "$checkout/$INDEX_FILE" ]] || die "source is missing $INDEX_FILE"
     [[ -f "$checkout/瀚纳仕H5 demo.html" ]] || die "source is missing 瀚纳仕H5 demo.html"
     [[ -d "$checkout/assets" ]] || die "source is missing assets/"
+    [[ -f "$checkout/server.mjs" ]] || die "source is missing server.mjs"
+    [[ -f "$checkout/$SERVICE_TEMPLATE_FILE_NAME" ]] || die "source is missing $SERVICE_TEMPLATE_FILE_NAME"
     printf '%s\n' "$checkout"
 }
 
@@ -303,12 +370,65 @@ create_release() {
 
     rsync -a --delete \
         --include='*.html' \
+        --include='server.mjs' \
         --include='assets/***' \
         --exclude='*' \
         "$checkout/" "$RELEASE_PATH/"
 
     [[ -f "$RELEASE_PATH/$INDEX_FILE" ]] || die "release is missing $INDEX_FILE after rsync"
     [[ -d "$RELEASE_PATH/assets" ]] || die "release is missing assets/ after rsync"
+    [[ -f "$RELEASE_PATH/server.mjs" ]] || die "release is missing server.mjs after rsync"
+}
+
+ensure_server_env_file() {
+    if [[ ! -e "$ENV_PATH" ]]; then
+        cat > "$ENV_PATH" <<'EOF'
+# Add HAYS_AI_API_KEY here to enable live AI generation.
+# HAYS_AI_API_KEY=replace-with-your-key
+HAYS_AI_API_BASE_URL=https://api.deepseek.com
+HAYS_AI_MODEL=deepseek-v4-flash
+HAYS_AI_TIMEOUT_MS=45000
+HOST=127.0.0.1
+PORT=5173
+EOF
+    fi
+    chown root:www-data "$ENV_PATH"
+    chmod 640 "$ENV_PATH"
+}
+
+install_app_service() {
+    local template="$PROJECT_ROOT/$SERVICE_TEMPLATE_FILE_NAME"
+    [[ -f "$template" ]] || die "missing systemd template: $template"
+    install -m 644 "$template" "$SERVICE_PATH"
+    ensure_server_env_file
+    systemctl daemon-reload
+    systemctl enable "$SERVICE_NAME" >/dev/null
+}
+
+restart_app_service() {
+    if ! systemctl restart "$SERVICE_NAME"; then
+        log "failed to restart $SERVICE_NAME" >&2
+        return 1
+    fi
+    systemctl is-active --quiet "$SERVICE_NAME"
+}
+
+stop_app_service() {
+    systemctl stop "$SERVICE_NAME" >/dev/null 2>&1 || true
+}
+
+api_proxy_health_check() {
+    local attempt status
+    for attempt in $(seq 1 20); do
+        status="$(curl --silent --show-error --max-time 2 \
+            --request OPTIONS \
+            --output /dev/null \
+            --write-out '%{http_code}' \
+            'http://127.0.0.1:5173/api/fortune' 2>/dev/null || true)"
+        [[ "$status" == "204" ]] && return 0
+        sleep 1
+    done
+    return 1
 }
 
 atomic_link() {
@@ -384,6 +504,26 @@ https_health_check() {
     [[ "$status" == "200" ]] && page_marker_check "$body_file"
 }
 
+public_api_health_check() {
+    local status
+    if nginx_is_https; then
+        status="$(curl --silent --show-error --max-time 15 \
+            --request OPTIONS \
+            --resolve "$DOMAIN:443:127.0.0.1" \
+            --output /dev/null \
+            --write-out '%{http_code}' \
+            "https://$DOMAIN/api/fortune")" || return 1
+    else
+        status="$(curl --silent --show-error --max-time 15 \
+            --request OPTIONS \
+            --resolve "$DOMAIN:80:127.0.0.1" \
+            --output /dev/null \
+            --write-out '%{http_code}' \
+            "http://$DOMAIN/api/fortune")" || return 1
+    fi
+    [[ "$status" == "204" ]]
+}
+
 verify_site() {
     if ! http_health_check; then
         log "HTTP health check failed; expected the configured virtual host to serve the launch page" >&2
@@ -391,6 +531,10 @@ verify_site() {
     fi
     if nginx_is_https && ! https_health_check; then
         log "HTTPS health check failed; expected HTTP 200 containing 今天的班" >&2
+        return 1
+    fi
+    if ! public_api_health_check; then
+        log "API proxy health check failed; expected OPTIONS /api/fortune to return HTTP 204" >&2
         return 1
     fi
 }
@@ -459,9 +603,10 @@ rollback_release() {
 
     atomic_link "$previous_target" "$CURRENT_LINK"
     atomic_link "$current_target" "$PREVIOUS_LINK"
-    if ! ensure_nginx_running || ! verify_site; then
+    if ! restart_app_service || ! api_proxy_health_check || ! ensure_nginx_running || ! verify_site; then
         atomic_link "$current_target" "$CURRENT_LINK"
         atomic_link "$previous_target" "$PREVIOUS_LINK"
+        restart_app_service || true
         ensure_nginx_running || true
         die "rollback health check failed; restored the pre-rollback release"
     fi
@@ -475,18 +620,29 @@ deploy_release() {
     install_nginx_config
     ensure_nginx_running
     publish_release
+    install_app_service
 
-    if ! verify_site; then
+    if ! restart_app_service || ! api_proxy_health_check || ! verify_site; then
         restore_previous_links
         rm -rf -- "$RELEASE_PATH"
+        if [[ -n "$OLD_CURRENT" ]]; then
+            restart_app_service || true
+        else
+            stop_app_service
+        fi
         ensure_nginx_running || true
-        die "deployment health check failed; restored the previous release"
+        die "deployment service or health check failed; restored the previous release"
     fi
 
     if ((ENABLE_HTTPS == 1)); then
         if ! enable_https || ! verify_site; then
             restore_previous_links
             rm -rf -- "$RELEASE_PATH"
+            if [[ -n "$OLD_CURRENT" ]]; then
+                restart_app_service || true
+            else
+                stop_app_service
+            fi
             ensure_nginx_running || true
             die "HTTPS setup or verification failed; restored the previous release"
         fi
@@ -507,11 +663,13 @@ main() {
     TMP_ROOT="$(mktemp -d -t "${SITE_NAME}.XXXXXX")"
 
     ensure_packages
+    ensure_node_runtime
     detect_https_port_conflict
     ensure_https_packages
     prepare_directories
 
     if ((ROLLBACK == 1)); then
+        install_app_service
         rollback_release
         exit 0
     fi

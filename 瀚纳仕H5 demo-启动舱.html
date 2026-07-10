@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=750, viewport-fit=cover">
   <link rel="icon" href="data:,">
-  <title>AI 打工命盘 H5 线稿</title>
+  <title>今天的班，先让 AI 起一卦</title>
   <style>
     * {
       box-sizing: border-box;
@@ -472,9 +472,9 @@
     }
 
     .music-toggle {
-      width: 68px;
-      height: 68px;
-      border: 2px solid rgba(200, 251, 232, .86);
+      width: 42px;
+      height: 42px;
+      border: 1.5px solid rgba(200, 251, 232, .86);
       border-radius: 50%;
       padding: 0;
       position: relative;
@@ -484,9 +484,29 @@
       gap: 3px;
       background: rgba(10, 5, 50, .58);
       box-shadow:
-        0 0 22px rgba(33, 115, 255, .52),
-        inset 0 0 20px rgba(160, 242, 228, .16);
+        0 0 14px rgba(33, 115, 255, .48),
+        inset 0 0 14px rgba(160, 242, 228, .16);
       backdrop-filter: blur(8px);
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+      overflow: hidden;
+      appearance: none;
+      outline: none;
+    }
+
+    .music-toggle:focus,
+    .music-toggle:focus-visible,
+    .music-toggle:active {
+      outline: none;
+    }
+
+    .music-toggle *,
+    .music-toggle::before,
+    .music-toggle::after {
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     }
 
     .music-glyph {
@@ -494,13 +514,13 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
+      width: 24px;
+      height: 24px;
       color: #c8fbe8;
-      font-size: 42px;
+      font-size: 29px;
       line-height: 1;
       font-weight: 900;
-      filter: drop-shadow(0 0 9px rgba(160, 242, 228, .9));
+      filter: drop-shadow(0 0 7px rgba(160, 242, 228, .9));
       animation: musicGlyphPulse 1.8s ease-in-out infinite;
     }
 
@@ -513,14 +533,14 @@
     .music-toggle::after {
       content: "";
       position: absolute;
-      width: 42px;
-      height: 2px;
+      width: 25px;
+      height: 1.5px;
       border-radius: 999px;
       background: #c8fbe8;
       transform: rotate(-45deg);
       opacity: 0;
       transition: opacity .24s ease;
-      box-shadow: 0 0 10px rgba(200, 251, 232, .8);
+      box-shadow: 0 0 7px rgba(200, 251, 232, .8);
     }
 
     .music-toggle.is-muted::after {
@@ -530,7 +550,7 @@
     .music-toggle:not(.is-muted)::before {
       content: "";
       position: absolute;
-      inset: -8px;
+      inset: -5px;
       border-radius: 50%;
       border: 1px solid rgba(160, 242, 228, .42);
       animation: soundPulse 1.8s ease-out infinite;
@@ -967,7 +987,7 @@
 
     .birth-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 16px;
     }
 
@@ -1839,12 +1859,8 @@
       min-width: 0;
       flex: 1;
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      align-items: center;
-    }
-
-    .parameter-selector.place .parameter-selector-values {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: center;
     }
 
     .parameter-selector-value {
@@ -2328,22 +2344,8 @@
       background: radial-gradient(ellipse at 50% 50%, rgba(160, 242, 228, .1), transparent 64%);
     }
 
-    .loading-kicker {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 38px;
-      padding: 0 18px;
-      border: 1px solid rgba(200, 251, 232, .36);
-      border-radius: 999px;
-      color: #c8fbe8;
-      background: rgba(33, 115, 255, .14);
-      font-size: 20px;
-      font-weight: 900;
-    }
-
     .loading-ritual-screen .loading-panel h2 {
-      margin-top: 24px;
+      margin-top: 0;
       font-size: 46px;
       line-height: 1.16;
       text-shadow:
@@ -2632,9 +2634,43 @@
       user-select: none;
     }
 
+    .poster-board.is-save-ready {
+      touch-action: auto;
+      -webkit-user-select: auto;
+      user-select: auto;
+    }
+
     .poster-ritual-screen .poster-board.is-pressing {
       transform: scale(.985);
       filter: drop-shadow(0 0 44px rgba(160, 242, 228, .38));
+    }
+
+    .poster-save-image {
+      position: relative;
+      z-index: 2;
+      display: none;
+      width: 100%;
+      height: auto;
+      border: 1px solid rgba(200, 251, 232, .52);
+      border-radius: 28px;
+      background: #071044;
+      box-shadow:
+        0 22px 68px rgba(0, 4, 28, .34),
+        0 0 34px rgba(80, 173, 255, .26);
+      -webkit-touch-callout: default;
+      -webkit-user-select: auto;
+      user-select: auto;
+      touch-action: auto;
+      pointer-events: auto;
+    }
+
+    .poster-board.is-save-ready .poster-aura,
+    .poster-board.is-save-ready .poster-card {
+      display: none;
+    }
+
+    .poster-board.is-save-ready .poster-save-image {
+      display: block;
     }
 
     .poster-ritual-screen .poster-note {
@@ -2670,21 +2706,23 @@
       aspect-ratio: auto;
       min-height: 960px;
       display: grid;
-      grid-template-rows: auto auto;
+      grid-template-rows: auto;
       align-content: start;
-      row-gap: 30px;
-      padding: 40px 42px 44px;
+      row-gap: 0;
+      padding: 38px 38px 42px;
       overflow: hidden;
-      border: 1px solid rgba(200, 251, 232, .42);
-      border-radius: 6px;
+      border: 1px solid rgba(200, 251, 232, .52);
+      border-radius: 28px;
       color: #fff;
       background:
-        radial-gradient(circle at 50% 16%, rgba(113, 202, 255, .38), transparent 30%),
-        radial-gradient(ellipse at 50% 58%, rgba(160, 242, 228, .12), transparent 40%),
+        radial-gradient(circle at 54% 16%, rgba(113, 202, 255, .32), transparent 31%),
+        radial-gradient(ellipse at 50% 55%, rgba(160, 242, 228, .1), transparent 42%),
         radial-gradient(ellipse at 50% 88%, rgba(33, 115, 255, .16), transparent 42%),
         linear-gradient(180deg, #0a216f 0%, #071044 42%, #04031c 100%);
       box-shadow:
         0 22px 56px rgba(0, 8, 36, .42),
+        0 0 34px rgba(80, 173, 255, .24),
+        inset 0 0 0 2px rgba(33, 115, 255, .22),
         inset 0 0 0 1px rgba(255, 255, 255, .06);
       isolation: isolate;
     }
@@ -2697,7 +2735,10 @@
       background:
         radial-gradient(circle at 18% 18%, rgba(200, 251, 232, .08), transparent 22%),
         radial-gradient(circle at 82% 14%, rgba(80, 173, 255, .12), transparent 24%),
+        linear-gradient(90deg, rgba(160, 242, 228, .08) 1px, transparent 1px),
+        linear-gradient(rgba(160, 242, 228, .05) 1px, transparent 1px),
         linear-gradient(180deg, rgba(255, 255, 255, .04) 0%, transparent 30%, rgba(5, 3, 28, .78) 100%);
+      background-size: auto, auto, 44px 44px, 44px 44px, auto;
       opacity: .82;
       pointer-events: none;
     }
@@ -2738,9 +2779,9 @@
       position: absolute;
       z-index: 0;
       left: 50%;
-      top: 112px;
-      width: 560px;
-      height: 270px;
+      top: 152px;
+      width: 590px;
+      height: 320px;
       transform: translateX(-50%);
       background:
         linear-gradient(90deg, transparent 0%, rgba(160, 242, 228, .32) 22%, rgba(33, 115, 255, .54) 50%, rgba(160, 242, 228, .28) 78%, transparent 100%),
@@ -2755,11 +2796,243 @@
       z-index: 1;
     }
 
+    .poster-brand-line {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .poster-logo {
+      display: block;
+      width: 178px;
+      height: auto;
+      filter:
+        drop-shadow(0 0 12px rgba(160, 242, 228, .3))
+        drop-shadow(0 10px 20px rgba(0, 0, 0, .18));
+    }
+
+    .poster-scene {
+      position: relative;
+      z-index: 0;
+      width: 100%;
+      max-width: 540px;
+      height: 288px;
+      margin: 24px auto 12px;
+      opacity: .92;
+      pointer-events: none;
+    }
+
+    .poster-scene::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 58%;
+      width: 520px;
+      height: 182px;
+      transform: translate(-50%, -50%) rotate(-3deg);
+      border: 1px solid rgba(160, 242, 228, .2);
+      border-radius: 50%;
+      box-shadow:
+        inset 0 0 34px rgba(80, 173, 255, .1),
+        0 0 34px rgba(80, 173, 255, .12);
+    }
+
+    .poster-scene::after {
+      content: "";
+      position: absolute;
+      inset: 26px 8px 12px;
+      background:
+        linear-gradient(90deg, rgba(160, 242, 228, .18) 1px, transparent 1px),
+        linear-gradient(rgba(160, 242, 228, .1) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 78%, transparent 100%);
+      opacity: .38;
+    }
+
+    .poster-scene-laptop,
+    .poster-scene-badge,
+    .poster-scene-door,
+    .poster-scene-arrow {
+      position: absolute;
+      box-shadow:
+        0 0 18px rgba(80, 173, 255, .16),
+        inset 0 0 18px rgba(160, 242, 228, .05);
+    }
+
+    .poster-scene-laptop {
+      left: 8px;
+      top: 138px;
+      width: 178px;
+      height: 92px;
+      border: 2px solid rgba(160, 242, 228, .42);
+      border-radius: 14px;
+      background: rgba(4, 8, 40, .34);
+    }
+
+    .poster-scene-laptop::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -16px;
+      width: 206px;
+      height: 14px;
+      transform: translateX(-50%);
+      border: 2px solid rgba(80, 173, 255, .36);
+      border-top: 0;
+      border-radius: 0 0 18px 18px;
+      background: rgba(7, 4, 38, .2);
+    }
+
+    .poster-scene-laptop::after {
+      content: "";
+      position: absolute;
+      left: 26px;
+      right: 26px;
+      bottom: 22px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255, 207, 94, .82), rgba(160, 242, 228, .5), transparent);
+      box-shadow: 0 0 12px rgba(255, 207, 94, .38);
+    }
+
+    .poster-scene-laptop span,
+    .poster-scene-badge span,
+    .poster-scene-door span,
+    .poster-scene-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #c8fbe8;
+      font-size: 16px;
+      line-height: 1.2;
+      font-weight: 950;
+      text-shadow: 0 0 12px rgba(160, 242, 228, .48);
+      white-space: nowrap;
+    }
+
+    .poster-scene-laptop span {
+      min-height: 30px;
+      margin-top: 22px;
+      padding: 0 12px;
+      border: 1px solid rgba(160, 242, 228, .24);
+      border-radius: 999px;
+      background: rgba(33, 115, 255, .16);
+    }
+
+    .poster-scene-laptop i {
+      position: absolute;
+      right: 22px;
+      top: 18px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ffcf5e;
+      box-shadow: 0 0 16px rgba(255, 207, 94, .7);
+    }
+
+    .poster-scene-badge {
+      left: 214px;
+      top: 56px;
+      width: 126px;
+      height: 84px;
+      border: 2px solid rgba(80, 173, 255, .42);
+      border-radius: 18px;
+      background: rgba(7, 4, 38, .28);
+      transform: rotate(-7deg);
+    }
+
+    .poster-scene-badge::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -38px;
+      width: 2px;
+      height: 40px;
+      background: linear-gradient(rgba(160, 242, 228, 0), rgba(160, 242, 228, .48));
+      transform: translateX(-50%);
+    }
+
+    .poster-scene-badge::after {
+      content: "";
+      position: absolute;
+      left: 21px;
+      right: 21px;
+      bottom: 17px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(160, 242, 228, .48), transparent);
+    }
+
+    .poster-scene-badge span {
+      width: 100%;
+      height: 100%;
+      font-size: 15px;
+    }
+
+    .poster-scene-door {
+      right: 28px;
+      top: 98px;
+      width: 126px;
+      height: 126px;
+      border: 2px solid rgba(160, 242, 228, .38);
+      border-radius: 18px 18px 6px 6px;
+      background:
+        linear-gradient(135deg, rgba(80, 173, 255, .13), rgba(7, 4, 38, .26)),
+        rgba(4, 8, 40, .2);
+    }
+
+    .poster-scene-door::before {
+      content: "";
+      position: absolute;
+      right: 22px;
+      top: 58px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ffcf5e;
+      box-shadow: 0 0 16px rgba(255, 207, 94, .72);
+    }
+
+    .poster-scene-door::after {
+      content: "";
+      position: absolute;
+      left: -14px;
+      right: -14px;
+      bottom: -12px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(160, 242, 228, .44), transparent);
+    }
+
+    .poster-scene-door span {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      top: 24px;
+      min-height: 32px;
+      border: 1px solid rgba(160, 242, 228, .22);
+      border-radius: 999px;
+      background: rgba(33, 115, 255, .13);
+    }
+
+    .poster-scene-arrow {
+      right: 34px;
+      top: 214px;
+      min-height: 36px;
+      padding: 0 18px;
+      border: 2px solid rgba(160, 242, 228, .7);
+      border-radius: 0;
+      color: #c8fbe8;
+      background: rgba(7, 4, 38, .32);
+      clip-path: polygon(0 0, calc(100% - 24px) 0, calc(100% - 24px) 22%, 100% 50%, calc(100% - 24px) 78%, calc(100% - 24px) 100%, 0 100%, 14px 50%);
+      font-size: 16px;
+      transform: rotate(-2deg);
+    }
+
     .poster-risk {
       position: relative;
       width: 100%;
       max-width: 540px;
-      margin: 36px auto 0;
+      margin: 30px auto 0;
       padding: 18px 28px 20px;
       border-top: 1px solid rgba(160, 242, 228, .34);
       border-bottom: 1px solid rgba(80, 173, 255, .24);
@@ -2794,15 +3067,14 @@
 
     .poster-kicker {
       position: relative;
-      margin-top: 22px;
-      min-height: 40px;
-      padding: 0 18px;
+      min-height: 34px;
+      padding: 0 16px;
       border: 1px solid rgba(200, 251, 232, .34);
       border-radius: 999px;
       color: #c8fbe8;
       background: rgba(7, 4, 38, .28);
       backdrop-filter: blur(8px);
-      font-size: 20px;
+      font-size: 18px;
       line-height: 1.2;
       letter-spacing: 0;
       text-shadow: 0 0 18px rgba(160, 242, 228, .46);
@@ -2819,6 +3091,11 @@
       pointer-events: none;
     }
 
+    .poster-brand-line .poster-kicker::before,
+    .poster-brand-line .poster-kicker::after {
+      display: none;
+    }
+
     .poster-kicker::before {
       right: calc(100% + 12px);
     }
@@ -2830,69 +3107,221 @@
 
     .poster-big {
       position: relative;
+      z-index: 2;
       box-sizing: border-box;
-      width: fit-content;
-      min-width: 500px;
+      width: 100%;
+      min-width: 0;
       max-width: 100%;
-      margin-top: 36px;
-      padding: 26px 34px 32px;
-      background:
-        linear-gradient(180deg, rgba(5, 8, 34, .92), rgba(7, 12, 54, .82)),
-        radial-gradient(circle at 50% 0%, rgba(80, 173, 255, .28), transparent 64%);
-      clip-path: polygon(28px 0, calc(100% - 58px) 0, 100% 34px, calc(100% - 26px) 100%, 58px 100%, 0 calc(100% - 34px), 0 28px);
+      margin-top: 0;
+      padding: 0 10px;
+      background: transparent;
+      clip-path: none;
       font-family: Impact, "Arial Black", "PingFang SC", "Microsoft YaHei", sans-serif;
-      font-size: 88px;
-      line-height: .94;
+      font-size: 82px;
+      line-height: 1.02;
       font-weight: 900;
       letter-spacing: 0;
       color: #fff;
       white-space: nowrap;
       -webkit-text-stroke: 1px rgba(255, 255, 255, .88);
       transform: none;
-      box-shadow:
-        0 18px 48px rgba(0, 0, 0, .22),
-        inset 0 0 34px rgba(80, 173, 255, .13);
+      box-shadow: none;
       text-shadow:
-        0 7px 0 rgba(33, 115, 255, .88),
+        0 6px 0 rgba(33, 115, 255, .82),
         0 0 34px rgba(80, 173, 255, .78),
         0 0 68px rgba(160, 242, 228, .24);
     }
 
     .poster-big.is-long {
-      min-width: 560px;
+      min-width: 0;
       padding-right: 30px;
       padding-left: 30px;
-      font-size: 80px;
+      font-size: 72px;
     }
 
     .poster-big::before {
       content: "";
       position: absolute;
-      left: 13%;
-      right: 13%;
-      top: 0;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, #a0f2e4, #2173ff, transparent);
+      left: 58px;
+      top: -20px;
+      width: 42px;
+      height: 52px;
+      border-left: 4px solid #a0f2e4;
+      border-top: 4px solid #a0f2e4;
+      background: transparent;
       box-shadow: 0 0 18px rgba(80, 173, 255, .72);
       pointer-events: none;
     }
 
+    .poster-big::after {
+      content: "";
+      position: absolute;
+      right: 58px;
+      bottom: -10px;
+      width: 42px;
+      height: 52px;
+      border-right: 4px solid #a0f2e4;
+      border-bottom: 4px solid #a0f2e4;
+      filter: drop-shadow(0 0 14px rgba(80, 173, 255, .68));
+      pointer-events: none;
+    }
+
     .poster-body {
+      z-index: 2;
       max-width: 540px;
       margin: 24px auto 0;
-      padding: 0;
-      font-size: 26px;
-      line-height: 1.42;
-      font-weight: 800;
+      padding: 18px 52px 20px;
+      border-top: 1px solid rgba(160, 242, 228, .18);
+      border-bottom: 1px solid rgba(80, 173, 255, .22);
+      font-size: 28px;
+      line-height: 1.45;
+      font-weight: 900;
       text-align: center;
       background: transparent;
       clip-path: none;
+      text-shadow: 0 0 18px rgba(80, 173, 255, .32);
+    }
+
+    .poster-script-strip {
+      position: relative;
+      width: 100%;
+      max-width: 540px;
+      margin: 26px auto 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 14px 0;
+      align-items: center;
+      border: 0;
+      text-align: left;
+    }
+
+    .poster-script-strip::before {
+      content: none;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -1px;
+      width: 160px;
+      height: 1px;
+      margin: auto;
+      background: linear-gradient(90deg, transparent, #a0f2e4, #2173ff, transparent);
+      box-shadow: 0 0 14px rgba(80, 173, 255, .46);
+      pointer-events: none;
+    }
+
+    .poster-script-label {
+      position: relative;
+      display: inline-flex;
+      min-height: 58px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0 0 70px;
+      border: 1px solid rgba(80, 173, 255, .64);
+      border-right: 0;
+      border-radius: 999px 0 0 999px;
+      background: rgba(7, 4, 38, .42);
+      color: #c8fbe8;
+      font-size: 21px;
+      line-height: 1.2;
+      font-weight: 900;
+      text-shadow: 0 0 14px rgba(160, 242, 228, .34);
+      white-space: nowrap;
+    }
+
+    .poster-script-label::before,
+    .poster-action-seal::before {
+      content: "";
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      width: 42px;
+      height: 42px;
+      border: 2px solid rgba(160, 242, 228, .74);
+      border-radius: 50%;
+      transform: translateY(-50%);
+      background:
+        radial-gradient(circle at 50% 50%, rgba(160, 242, 228, .2) 0 4px, transparent 5px),
+        rgba(33, 115, 255, .12);
+      box-shadow:
+        inset 0 0 18px rgba(80, 173, 255, .14),
+        0 0 18px rgba(80, 173, 255, .24);
+    }
+
+    .poster-script-name {
+      display: flex;
+      min-height: 58px;
+      align-items: center;
+      padding: 0 26px 0 10px;
+      border: 1px solid rgba(80, 173, 255, .64);
+      border-left: 0;
+      border-radius: 0 999px 999px 0;
+      background: rgba(7, 4, 38, .42);
+      color: #fff;
+      font-size: 32px;
+      line-height: 1.2;
+      font-weight: 900;
+      text-shadow: 0 0 18px rgba(80, 173, 255, .48);
+      overflow-wrap: anywhere;
+    }
+
+    .poster-script-copy {
+      display: none;
+      grid-column: 1 / -1;
+      margin: 0;
+      color: rgba(255, 255, 255, .86);
+      font-size: 22px;
+      line-height: 1.38;
+      font-weight: 850;
+      text-shadow: 0 0 12px rgba(80, 173, 255, .22);
+    }
+
+    .poster-action-seal {
+      position: relative;
+      grid-column: 1 / -1;
+      justify-self: stretch;
+      display: inline-flex;
+      min-height: 58px;
+      align-items: center;
+      padding: 0 26px 0 96px;
+      border: 1px solid rgba(80, 173, 255, .64);
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(7, 4, 38, .42);
+      font-size: 29px;
+      line-height: 1.2;
+      font-weight: 950;
+      box-shadow:
+        inset 0 0 24px rgba(80, 173, 255, .14),
+        0 0 18px rgba(80, 173, 255, .18);
+      text-shadow: 0 0 18px rgba(80, 173, 255, .46);
+    }
+
+    .poster-action-seal::before {
+      background:
+        linear-gradient(135deg, transparent 45%, #a0f2e4 46% 54%, transparent 55%),
+        radial-gradient(circle at 70% 30%, #ffcf5e 0 3px, transparent 4px),
+        rgba(33, 115, 255, .12);
+    }
+
+    .poster-action-seal span {
+      color: #c8fbe8;
+      font-size: 24px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .poster-action-seal b {
+      margin-left: 8px;
+      color: #fff;
+      font: inherit;
+      overflow-wrap: anywhere;
     }
 
     .poster-metric-list {
       width: 100%;
       max-width: 540px;
-      margin: 36px 0 0;
+      margin: 28px 0 0;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 14px 16px;
@@ -2967,11 +3396,16 @@
       text-shadow: 0 0 14px rgba(80, 173, 255, .2);
     }
 
+    .poster-metric-list,
+    .poster-risk {
+      display: none;
+    }
+
     .qr-wire {
       display: block;
-      width: 132px;
-      height: 132px;
-      margin: -3px;
+      width: 122px;
+      height: 122px;
+      margin: -6px;
       border: 0;
       border-radius: 18px;
       padding: 0;
@@ -2984,14 +3418,18 @@
     .poster-qr-block {
       align-self: start;
       display: grid;
-      grid-template-columns: 126px minmax(0, 1fr);
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "qr"
+        "copy";
       align-items: center;
-      gap: 22px;
+      justify-items: center;
+      gap: 8px;
       justify-self: center;
       width: 100%;
-      max-width: 500px;
+      max-width: 220px;
       margin-top: 30px;
-      padding: 0 0 8px;
+      padding: 0 10px 4px;
       border: 0;
       border-radius: 0;
       background: transparent;
@@ -3000,35 +3438,40 @@
     }
 
     .qr-crop {
-      width: 126px;
-      height: 126px;
+      grid-area: qr;
+      width: 86px;
+      height: 86px;
       overflow: hidden;
-      border-radius: 22px;
+      border-radius: 14px;
       background: rgba(255, 255, 255, .96);
       box-shadow:
-        0 0 0 1px rgba(255, 255, 255, .36),
-        0 12px 30px rgba(0, 4, 28, .28);
-    }
-
-    .poster-qr-block::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: -28px;
-      display: block;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(160, 242, 228, .5), rgba(33, 115, 255, .42), transparent);
-      box-shadow: 0 0 18px rgba(80, 173, 255, .38);
+        0 0 0 1px rgba(255, 255, 255, .58),
+        0 10px 24px rgba(0, 4, 28, .24);
     }
 
     .poster-qr-copy {
-      color: rgba(255, 255, 255, .9);
-      max-width: 330px;
-      font-size: 22px;
-      line-height: 1.38;
+      grid-area: copy;
+      display: block;
+      max-width: none;
+      font-size: 18px;
+      line-height: 1.22;
       font-weight: 900;
-      text-shadow: 0 0 12px rgba(80, 173, 255, .36);
+      color: rgba(200, 251, 232, .88);
+      text-align: center;
+      text-shadow: 0 0 10px rgba(80, 173, 255, .28);
+      white-space: nowrap;
+    }
+
+    .poster-qr-foot {
+      grid-area: foot;
+      margin: 0;
+      color: rgba(255, 255, 255, .7);
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: 0;
+      text-shadow: 0 0 12px rgba(80, 173, 255, .28);
     }
 
     .modal {
@@ -3122,37 +3565,14 @@
       text-align: right;
     }
 
-    .share-guide-bubble strong {
-      display: block;
-      font-size: 42px;
-      line-height: 1.1;
-      font-weight: 900;
-      text-shadow:
-        0 5px 0 rgba(33, 115, 255, .72),
-        0 0 24px rgba(160, 242, 228, .5);
-    }
-
     .share-guide-bubble p {
-      margin: 18px 0 0 auto;
+      margin: 0 0 0 auto;
       max-width: 430px;
       font-size: 24px;
       line-height: 1.48;
       font-weight: 800;
       color: rgba(255, 255, 255, .88);
       text-shadow: 0 0 16px rgba(0, 0, 0, .36);
-    }
-
-    .share-guide-close {
-      margin-top: 26px;
-      min-height: 54px;
-      padding: 0 26px;
-      border: 0;
-      border-radius: 999px;
-      color: #0a0532;
-      background: linear-gradient(135deg, #a0f2e4, #2173ff);
-      font-size: 22px;
-      font-weight: 900;
-      box-shadow: 0 0 28px rgba(80, 173, 255, .45);
     }
 
     @keyframes ritualBgDrift {
@@ -3489,7 +3909,6 @@
 
       <div class="loading-wrap">
         <div class="loading-panel">
-          <div class="loading-kicker">生成中</div>
           <h2>AI 正在生成你的职场命盘</h2>
           <p class="loading-summary">正在整合你的出生坐标、城市磁场和本次抽牌，稍等一下就开盘。</p>
           <div class="scan-box" aria-hidden="true">
@@ -3609,11 +4028,37 @@
 
       <div id="posterArea" class="poster-board" data-long-press-save="poster">
         <div class="poster-aura" aria-hidden="true"></div>
+        <img class="poster-save-image" id="posterSaveImage" alt="可长按保存的海报">
         <article class="poster-card">
-          <div class="poster-main">
-            <span class="poster-kicker">HAYS 职场玄学人格节</span>
+            <div class="poster-main">
+              <div class="poster-brand-line">
+                <img class="poster-logo" id="posterLogo" src="assets/hays-logo-blue.png" alt="Hays">
+              </div>
+            <div class="poster-scene" aria-hidden="true">
+              <div class="poster-scene-laptop">
+                <span id="posterSceneLaptop">AI 已开盘</span>
+                <i></i>
+              </div>
+              <div class="poster-scene-badge">
+                <span id="posterSceneBadge">班味检测中</span>
+              </div>
+              <div class="poster-scene-door">
+                <span id="posterSceneDoor">机会</span>
+              </div>
+              <div class="poster-scene-arrow" id="posterSceneArrow">+一点勇气</div>
+            </div>
             <div class="poster-big" id="posterSummary">人间搞钱符</div>
             <p class="poster-body" id="posterOneLine">本周别只在心里涨薪，先把你的身价写得像真的会发光。</p>
+
+            <div class="poster-script-strip">
+              <span class="poster-script-label">本次机会签</span>
+              <strong class="poster-script-name" id="posterDrawName">钱来不来</strong>
+              <p class="poster-script-copy" id="posterDrawOracle">钱不是不来，是你还没把门牌号写清楚。</p>
+              <span class="poster-action-seal">
+                <span>今日动作：</span>
+                <b id="posterActionTag">简历开光</b>
+              </span>
+            </div>
 
             <div class="poster-metric-list" id="posterIndexes">
               <div><span>贵人运</span><b>★★★★☆</b></div>
@@ -3629,13 +4074,13 @@
           </div>
           <div class="poster-qr-block">
             <div class="qr-crop">
-              <img class="qr-wire" src="assets/hays-qr.png" alt="Hays 官网二维码">
+              <canvas class="qr-wire" id="posterQrCanvas" width="240" height="240" aria-label="H5 页面二维码"></canvas>
             </div>
-            <p class="poster-qr-copy">扫码围观我的打工人格，顺手给自己也起一卦。</p>
+            <p class="poster-qr-copy">扫码给自己也起一卦</p>
           </div>
         </article>
       </div>
-      <p class="poster-note">长按屏幕保存海报到相册</p>
+      <p class="poster-note">长按海报图片保存到相册</p>
 
       <div class="poster-actions">
         <button class="primary-btn wide-action" type="button" data-action="解锁隐藏机会签">解锁隐藏机会签</button>
@@ -3659,9 +4104,7 @@
   <div class="share-guide" id="shareGuide" aria-hidden="true">
     <div class="share-guide-arrow" aria-hidden="true"></div>
     <div class="share-guide-bubble">
-      <strong>把这张工牌甩进群</strong>
       <p>点右上角“...”开传送门，发给同频打工人，看看谁的命盘先显灵。</p>
-      <button class="share-guide-close" id="shareGuideClose" type="button">收到，去摇人</button>
     </div>
   </div>
 
@@ -3683,6 +4126,7 @@
 
   <div class="toast" id="toast" role="status">操作成功</div>
 
+  <script src="assets/qrcode.min.js"></script>
   <script>
     const answers = {};
     const profileKeys = ["name", "birth", "birthPlace", "livePlace"];
@@ -3690,6 +4134,8 @@
     const HAYS_UPLOAD_URL = "https://www.hays-china.cn/";
     const HAYS_REPORT_URL = "https://app.jingsocial.com/microFrontend/contentCenterH5/center/UpXWhEGxD8iFZGD3J6EZJ8?promotion_value=sCrBGNeUHEpqLHXAbTh6PF";
     const REPORT_ACTION = "更多打工情报";
+    const AI_FORTUNE_ENDPOINT = "/api/fortune";
+    const AI_FORTUNE_TIMEOUT_MS = 45000;
     const loadingMessages = [
       "正在校准你的班味浓度...",
       "正在查询贵人是否在线...",
@@ -3752,8 +4198,13 @@
     const musicToggle = document.querySelector("#musicToggle");
     const bgMusic = document.querySelector("#bgMusic");
     const shareGuide = document.querySelector("#shareGuide");
-    const shareGuideClose = document.querySelector("#shareGuideClose");
     const posterArea = document.querySelector("#posterArea");
+    const posterQrCanvas = document.querySelector("#posterQrCanvas");
+    const posterSaveImage = document.querySelector("#posterSaveImage");
+    const posterLogo = document.querySelector("#posterLogo");
+    const POSTER_TEMPLATE_SRC = "assets/poster-result-template.png";
+    const posterTemplateImage = new Image();
+    posterTemplateImage.src = POSTER_TEMPLATE_SRC;
     const LONG_PRESS_MS = 650;
     const MUSIC_VOLUME = 0.42;
     const SFX_VOLUME = 0.26;
@@ -3764,6 +4215,9 @@
     let activePickerGroup = "";
     let pendingGroupValues = [];
     let didPrimeDefaultMusic = false;
+    let loadingRunId = 0;
+    let lastPosterReport;
+    let posterRenderRunId = 0;
 
     bgMusic.volume = MUSIC_VOLUME;
 
@@ -3785,6 +4239,9 @@
       }
       if (id === "posterScreen") {
         playSfx("poster");
+        if (lastPosterReport) {
+          refreshPosterAssets(lastPosterReport);
+        }
       }
     }
 
@@ -3822,6 +4279,7 @@
     }
 
     function toggleMusic() {
+      musicToggle.blur();
       if (isMusicOn) {
         bgMusic.pause();
         setMusicState(false);
@@ -4219,23 +4677,117 @@
       document.querySelector(`#bar${id}`).style.width = `${value * 20}%`;
     }
 
-    function buildReport() {
+    function createFallbackReport() {
       const score = scoreReport();
       const profile = createProfile();
       const summary = createSummary(profile);
       const draw = createDraw();
       const actions = createActions();
       const risk = createRisk();
+      return {
+        personaName: profile.name,
+        personaSubline: `抽到一张${answers.period || "本周"}工牌，有点东西。截图发群，看看谁先说准。`,
+        insight: summary,
+        drawName: draw.name,
+        drawOracle: draw.oracle,
+        actions,
+        risk,
+        scores: score
+      };
+    }
+
+    async function requestAiReport(fallback) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), AI_FORTUNE_TIMEOUT_MS);
+      try {
+        const response = await fetch(AI_FORTUNE_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
+          body: JSON.stringify({
+            answers: {
+              name: answers.name || "",
+              birth: answers.birth || "",
+              birthPlace: answers.birthPlace || "",
+              livePlace: answers.livePlace || "",
+              period: answers.period || "",
+              theme: answers.theme || ""
+            },
+            fallback,
+            clientSeed: `${Date.now()}-${Math.random().toString(16).slice(2)}`
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`AI fortune request failed with ${response.status}`);
+        }
+        const data = await response.json();
+        return data.report;
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    function normalizeClientReport(report, fallback) {
+      const source = report || {};
+      return {
+        personaName: compactText(source.personaName, fallback.personaName, 12),
+        personaSubline: compactText(source.personaSubline, fallback.personaSubline, 56),
+        insight: compactText(source.insight, fallback.insight, 64),
+        drawName: compactText(source.drawName, fallback.drawName, 12),
+        drawOracle: compactText(source.drawOracle, fallback.drawOracle, 60),
+        actions: normalizeClientActions(source.actions, fallback.actions),
+        risk: compactText(source.risk, fallback.risk, 64),
+        scores: {
+          career: clampClientScore(source.scores?.career, fallback.scores.career),
+          timing: clampClientScore(source.scores?.timing, fallback.scores.timing),
+          interview: clampClientScore(source.scores?.interview, fallback.scores.interview),
+          salary: clampClientScore(source.scores?.salary, fallback.scores.salary)
+        }
+      };
+    }
+
+    function compactText(value, fallback, maxLength) {
+      const text = String(value || "").replace(/[\r\n\t]+/g, " ").replace(/\s{2,}/g, " ").trim();
+      const safe = text || String(fallback || "");
+      return [...safe].slice(0, maxLength).join("");
+    }
+
+    function normalizeClientActions(actions, fallbackActions) {
+      const cleanActions = Array.isArray(actions)
+        ? actions.map(item => compactText(item, "", 12)).filter(Boolean).slice(0, 3)
+        : [];
+      return cleanActions.length === 3 ? cleanActions : fallbackActions.slice(0, 3);
+    }
+
+    function clampClientScore(value, fallback) {
+      const number = Number.isFinite(Number(value)) ? Math.round(Number(value)) : Number(fallback);
+      return Math.max(1, Math.min(5, number || 3));
+    }
+
+    async function buildReport() {
+      const fallback = createFallbackReport();
+      try {
+        const aiReport = await requestAiReport(fallback);
+        return normalizeClientReport(aiReport, fallback);
+      } catch (error) {
+        console.warn("AI fortune fallback", error);
+        return fallback;
+      }
+    }
+
+    function renderReport(report) {
       const displayName = answers.name || "你";
+      const score = report.scores;
       const personaSubline = document.querySelector("#personaSubline");
 
-      document.querySelector("#summaryLine").textContent = profile.name;
-      personaSubline.innerHTML = `<span class="persona-user-name">${escapeHTML(displayName)}</span> 抽到一张${escapeHTML(answers.period || "本周")}工牌，有点东西。截图发群，看看谁先说准。`;
-      document.querySelector("#reportInsight").textContent = summary;
-      document.querySelector("#drawName").textContent = draw.name;
-      document.querySelector("#drawOracle").textContent = draw.oracle;
-      document.querySelector("#actionList").innerHTML = actions.map(item => `<div class="action-item">${item}</div>`).join("");
-      document.querySelector("#riskText").textContent = risk;
+      document.querySelector("#summaryLine").textContent = report.personaName;
+      personaSubline.innerHTML = `<span class="persona-user-name">${escapeHTML(displayName)}</span> ${escapeHTML(report.personaSubline)}`;
+      document.querySelector("#reportInsight").textContent = report.insight;
+      document.querySelector("#drawName").textContent = report.drawName;
+      document.querySelector("#drawOracle").textContent = report.drawOracle;
+      document.querySelector("#actionList").innerHTML = report.actions.map(item => `<div class="action-item">${escapeHTML(item)}</div>`).join("");
+      document.querySelector("#riskText").textContent = report.risk;
 
       setIndex("Career", score.career);
       setIndex("Timing", score.timing);
@@ -4243,16 +4795,999 @@
       setIndex("Salary", score.salary);
 
       const posterSummary = document.querySelector("#posterSummary");
-      posterSummary.textContent = profile.name;
-      posterSummary.classList.toggle("is-long", [...profile.name].length >= 6);
-      document.querySelector("#posterOneLine").textContent = summary;
+      posterSummary.textContent = report.personaName;
+      posterSummary.classList.toggle("is-long", [...report.personaName].length >= 6);
+      document.querySelector("#posterOneLine").textContent = report.insight;
+      document.querySelector("#posterDrawName").textContent = report.drawName;
+      document.querySelector("#posterDrawOracle").textContent = report.drawOracle;
+      document.querySelector("#posterActionTag").textContent = report.actions?.[0] || "让入口可见";
+      renderPosterScene(report);
       document.querySelector("#posterIndexes").innerHTML = [
         ["贵人运", stars(score.career)],
         ["Offer 运", stars(score.interview)],
         ["搞钱运", stars(score.timing)],
         ["水逆预警", stars(score.salary)]
       ].map(([label, value]) => `<div><span>${label}</span><b>${value}</b></div>`).join("");
-      document.querySelector("#posterRiskLine").textContent = risk;
+      document.querySelector("#posterRiskLine").textContent = report.risk;
+      lastPosterReport = report;
+      refreshPosterAssets(report);
+    }
+
+    function renderPosterScene(report) {
+      const scene = getPosterScene(report);
+      document.querySelector("#posterSceneLaptop").textContent = scene.laptop;
+      document.querySelector("#posterSceneBadge").textContent = scene.badge;
+      document.querySelector("#posterSceneDoor").textContent = scene.door;
+      document.querySelector("#posterSceneArrow").textContent = scene.arrow;
+    }
+
+    function getPosterScene(report = {}) {
+      const sourceText = [
+        answers.theme,
+        report.personaName,
+        report.insight,
+        report.drawName,
+        report.drawOracle,
+        ...(report.actions || [])
+      ].filter(Boolean).join(" ");
+      const themeKey = getPosterSceneTheme(sourceText);
+      const scenes = {
+        money: {
+          laptop: "AI 已开盘",
+          badge: "身价检测中",
+          door: "Offer",
+          arrow: "+一点底气"
+        },
+        ally: {
+          laptop: "AI 已开盘",
+          badge: "贵人检测中",
+          door: "内推",
+          arrow: "+一点可见"
+        },
+        offer: {
+          laptop: "AI 已开盘",
+          badge: "面试检测中",
+          door: "Offer",
+          arrow: "+一点准备"
+        },
+        retrograde: {
+          laptop: "AI 已开盘",
+          badge: "水逆检测中",
+          door: "避雷",
+          arrow: "少一点硬刚"
+        },
+        switch: {
+          laptop: "AI 已开盘",
+          badge: "换局预警中",
+          door: "新局",
+          arrow: "+一点筹码"
+        },
+        chance: {
+          laptop: "AI 已开盘",
+          badge: "班味检测中",
+          door: "机会",
+          arrow: "+一点勇气"
+        }
+      };
+      const base = scenes[themeKey] || scenes.chance;
+      return {
+        ...base,
+        arrow: getPosterSceneAction(report.actions?.[0], base.arrow, themeKey)
+      };
+    }
+
+    function getPosterSceneTheme(text) {
+      const theme = answers.theme || "";
+      if (theme === "搞钱开门") return "money";
+      if (theme === "贵人在线") return "ally";
+      if (theme === "Offer敲门") return "offer";
+      if (theme === "水逆闪避") return "retrograde";
+      if (theme === "换局预警") return "switch";
+
+      if (/Offer|面试|项目讲顺|弹药/.test(text)) return "offer";
+      if (/贵人|内推|弱关系|可见/.test(text)) return "ally";
+      if (/水逆|留痕|承诺|避雷|硬刚|裸辞/.test(text)) return "retrograde";
+      if (/换局|副本|新局|机会池|筹码/.test(text)) return "switch";
+      if (/搞钱|薪|钱|身价|涨幅/.test(text)) return "money";
+      return "chance";
+    }
+
+    function getPosterSceneAction(action, fallback, themeKey) {
+      const label = compactText(action, "", 6);
+      if (!label) return fallback;
+      if (themeKey === "retrograde" || /少|别|避|留痕|承诺/.test(label)) {
+        return label;
+      }
+      return label.startsWith("+") ? label : `+${label}`;
+    }
+
+    function getH5ShareUrl() {
+      const h5Url = new URL(window.location.href);
+      h5Url.hash = "";
+      return h5Url.toString();
+    }
+
+    function refreshPosterAssets(report) {
+      const runId = ++posterRenderRunId;
+      posterArea.classList.remove("is-save-ready");
+      renderPosterQr()
+        .then(() => {
+          if (runId === posterRenderRunId) {
+            return renderPosterImage(report);
+          }
+          return undefined;
+        })
+        .catch(error => {
+          console.warn("Poster QR render failed", error);
+          if (runId === posterRenderRunId) {
+            return renderPosterImage(report);
+          }
+          return undefined;
+        });
+    }
+
+    async function renderPosterQr() {
+      const shareUrl = getH5ShareUrl();
+      const context = posterQrCanvas.getContext("2d");
+      context.clearRect(0, 0, posterQrCanvas.width, posterQrCanvas.height);
+
+      if (window.QRCode?.toCanvas) {
+        const QRCode = window.QRCode;
+        await QRCode.toCanvas(posterQrCanvas, shareUrl, {
+          width: 240,
+          margin: 1,
+          color: {
+            dark: "#05133f",
+            light: "#ffffff"
+          }
+        });
+        return;
+      }
+
+      if (window.QRCode) {
+        await renderPosterQrWithQRCodeJs(shareUrl);
+        return;
+      }
+
+      throw new Error("QRCode library unavailable");
+    }
+
+    async function renderPosterQrWithQRCodeJs(shareUrl) {
+      const QRCode = window.QRCode;
+      const holder = document.createElement("div");
+      new QRCode(holder, {
+        text: shareUrl,
+        width: 240,
+        height: 240,
+        colorDark: "#05133f",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      const context = posterQrCanvas.getContext("2d");
+      const generatedCanvas = holder.querySelector("canvas");
+      context.clearRect(0, 0, posterQrCanvas.width, posterQrCanvas.height);
+
+      if (generatedCanvas) {
+        context.drawImage(generatedCanvas, 0, 0, posterQrCanvas.width, posterQrCanvas.height);
+        return;
+      }
+
+      const generatedImage = holder.querySelector("img");
+      if (generatedImage) {
+        await drawGeneratedQrImage(generatedImage, context);
+        return;
+      }
+
+      throw new Error("QRCode render output unavailable");
+    }
+
+    function drawGeneratedQrImage(image, context) {
+      return new Promise((resolve, reject) => {
+        const drawImage = () => {
+          context.drawImage(image, 0, 0, posterQrCanvas.width, posterQrCanvas.height);
+          resolve();
+        };
+
+        if (image.complete && image.naturalWidth) {
+          drawImage();
+          return;
+        }
+
+        image.onload = drawImage;
+        image.onerror = () => reject(new Error("QRCode image failed to load"));
+      });
+    }
+
+    function renderPosterImage(report) {
+      const width = 650;
+      const height = 1000;
+      const activeRunId = posterRenderRunId;
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      const action = report.actions?.[0] || "让入口可见";
+
+      return Promise.all([
+        loadPosterAsset(posterTemplateImage),
+        loadPosterAsset(posterLogo)
+      ]).then(() => {
+        if (activeRunId !== posterRenderRunId) return;
+
+        const renderScale = posterTemplateImage.naturalWidth ? Math.min(2, Math.max(1, posterTemplateImage.naturalWidth / width)) : 1;
+        canvas.width = Math.round(width * renderScale);
+        canvas.height = Math.round(height * renderScale);
+        context.setTransform(renderScale, 0, 0, renderScale, 0, 0);
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = "high";
+
+        drawPosterTemplate(context, width, height);
+        drawPosterLogo(context, 48, 48, 156, 39);
+        drawPosterPersonalLabel(context, "你的职场玄学人格", width / 2, 370);
+        drawFitText(context, report.personaName, width / 2, 430, 64, 38, width - 96);
+        drawPosterInsightBox(context, report.insight, 74, 500, width - 148, 112);
+        drawPosterResultPanel(context, report, action, 74, 648, width - 148, 164);
+        drawPosterQrCta(context, width, height);
+
+        posterSaveImage.src = canvas.toDataURL("image/png");
+        posterArea.classList.add("is-save-ready");
+      });
+    }
+
+    function loadPosterAsset(image) {
+      return new Promise(resolve => {
+        if (!image || (image.complete && image.naturalWidth)) {
+          resolve();
+          return;
+        }
+
+        const finish = () => {
+          image.removeEventListener("load", finish);
+          image.removeEventListener("error", finish);
+          resolve();
+        };
+        image.addEventListener("load", finish, { once: true });
+        image.addEventListener("error", finish, { once: true });
+      });
+    }
+
+    function drawPosterTemplate(context, width, height) {
+      if (!posterTemplateImage.complete || !posterTemplateImage.naturalWidth) {
+        drawPosterBackground(context, width, height);
+        return;
+      }
+
+      const scale = Math.max(width / posterTemplateImage.naturalWidth, height / posterTemplateImage.naturalHeight);
+      const drawWidth = posterTemplateImage.naturalWidth * scale;
+      const drawHeight = posterTemplateImage.naturalHeight * scale;
+      context.drawImage(
+        posterTemplateImage,
+        (width - drawWidth) / 2,
+        (height - drawHeight) / 2,
+        drawWidth,
+        drawHeight
+      );
+    }
+
+    function drawPosterBackground(context, width, height) {
+      const background = context.createLinearGradient(0, 0, 0, height);
+      background.addColorStop(0, "#0a216f");
+      background.addColorStop(.42, "#071044");
+      background.addColorStop(1, "#04031c");
+      context.fillStyle = background;
+      context.fillRect(0, 0, width, height);
+
+      const glow = context.createRadialGradient(width / 2, 230, 40, width / 2, 230, 330);
+      glow.addColorStop(0, "rgba(200, 251, 232, .34)");
+      glow.addColorStop(.42, "rgba(80, 173, 255, .2)");
+      glow.addColorStop(1, "rgba(80, 173, 255, 0)");
+      context.fillStyle = glow;
+      context.fillRect(0, 0, width, height);
+
+      const floor = context.createRadialGradient(width / 2, 830, 20, width / 2, 830, 260);
+      floor.addColorStop(0, "rgba(160, 242, 228, .2)");
+      floor.addColorStop(1, "rgba(33, 115, 255, 0)");
+      context.fillStyle = floor;
+      context.fillRect(0, 520, width, 380);
+
+      context.save();
+      context.strokeStyle = "rgba(80, 173, 255, .18)";
+      context.lineWidth = 1;
+      for (let y = 30; y < height - 30; y += 34) {
+        context.beginPath();
+        context.moveTo(24, y);
+        context.lineTo(width - 24, y);
+        context.stroke();
+      }
+
+      context.shadowColor = "rgba(80, 173, 255, .78)";
+      context.shadowBlur = 18;
+      context.strokeStyle = "rgba(160, 242, 228, .82)";
+      context.lineWidth = 2.5;
+      roundedPath(context, 22, 22, width - 44, height - 44, 28);
+      context.stroke();
+      context.shadowBlur = 0;
+      context.strokeStyle = "rgba(33, 115, 255, .68)";
+      context.lineWidth = 1;
+      roundedPath(context, 27, 27, width - 54, height - 54, 24);
+      context.stroke();
+      context.restore();
+    }
+
+    function drawPosterLogo(context, x, y, width, height) {
+      if (posterLogo?.complete && posterLogo.naturalWidth) {
+        context.save();
+        context.shadowColor = "rgba(160, 242, 228, .32)";
+        context.shadowBlur = 12;
+        context.drawImage(posterLogo, x, y, width, height);
+        context.restore();
+        return;
+      }
+
+      context.save();
+      context.font = "900 35px Arial Black, Arial, sans-serif";
+      context.textAlign = "left";
+      context.textBaseline = "top";
+      context.fillStyle = "#ffffff";
+      context.shadowColor = "rgba(80, 173, 255, .72)";
+      context.shadowBlur = 14;
+      context.fillText("HAYS", x, y - 2);
+      context.restore();
+    }
+
+    function drawPosterPill(context, text, centerX, y, width, height) {
+      const x = centerX - width / 2;
+      context.save();
+      roundedPath(context, x, y, width, height, height / 2);
+      context.fillStyle = "rgba(33, 115, 255, .22)";
+      context.fill();
+      context.strokeStyle = "rgba(160, 242, 228, .42)";
+      context.shadowColor = "rgba(80, 173, 255, .36)";
+      context.shadowBlur = 12;
+      context.stroke();
+      context.shadowBlur = 0;
+      context.font = "900 23px Arial, 'PingFang SC', sans-serif";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillStyle = "#c8fbe8";
+      context.shadowColor = "rgba(160, 242, 228, .45)";
+      context.shadowBlur = 10;
+      let size = 23;
+      do {
+        context.font = `900 ${size}px Arial, 'PingFang SC', sans-serif`;
+        size -= 1;
+      } while (context.measureText(text).width > width - 34 && size >= 17);
+      context.fillText(text, centerX, y + height / 2 + 1);
+      context.restore();
+    }
+
+    function drawPosterScene(context, scene, x, y, width, height) {
+      context.save();
+      context.globalAlpha = .9;
+
+      const orbit = context.createRadialGradient(x + width / 2, y + height * .62, 40, x + width / 2, y + height * .62, width * .48);
+      orbit.addColorStop(0, "rgba(160, 242, 228, .13)");
+      orbit.addColorStop(.44, "rgba(80, 173, 255, .11)");
+      orbit.addColorStop(1, "rgba(80, 173, 255, 0)");
+      context.fillStyle = orbit;
+      context.fillRect(x, y, width, height);
+
+      drawSceneCurtains(context, x, y, width, height);
+
+      context.strokeStyle = "rgba(160, 242, 228, .2)";
+      context.lineWidth = 1.4;
+      context.setLineDash([5, 8]);
+      context.beginPath();
+      context.ellipse(x + width / 2, y + height * .66, width * .45, height * .27, -0.04, 0, Math.PI * 2);
+      context.stroke();
+      context.setLineDash([]);
+
+      drawSceneLaptop(context, x + 18, y + 138, 178, 92, scene.laptop);
+      drawSceneBadge(context, x + 238, y + 58, 126, 84, scene.badge);
+      drawSceneDoor(context, x + width - 174, y + 88, 136, 132, scene.door);
+      drawSceneAction(context, scene.arrow, x + width - 190, y + 190, 160, 40);
+      drawSceneSpark(context, x + 118, y + 94);
+      drawSceneSpark(context, x + 174, y + 62);
+      drawSceneSpark(context, x + width - 210, y + 120);
+      drawSceneSpark(context, x + width - 72, y + 76);
+      context.restore();
+    }
+
+    function drawSceneCurtains(context, x, y, width, height) {
+      context.save();
+      context.strokeStyle = "rgba(80, 173, 255, .28)";
+      context.lineWidth = 2;
+
+      [["left", x + 6, x + 116], ["right", x + width - 6, x + width - 116]].forEach(([side, outer, inner]) => {
+        context.beginPath();
+        context.moveTo(outer, y + 8);
+        context.bezierCurveTo(inner, y + 48, inner + (side === "left" ? -36 : 36), y + 132, outer, y + 188);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(outer, y + 28);
+        context.lineTo(inner, y + 168);
+        context.stroke();
+      });
+
+      context.strokeStyle = "rgba(33, 115, 255, .22)";
+      context.beginPath();
+      context.moveTo(x + 70, y + 92);
+      context.lineTo(x + width - 92, y + 66);
+      context.stroke();
+
+      context.strokeStyle = "rgba(160, 242, 228, .16)";
+      for (let i = 0; i < 5; i += 1) {
+        const rowY = y + height - 36 + i * 12;
+        context.beginPath();
+        context.ellipse(x + width / 2, rowY, width * (.36 + i * .035), 17, 0, Math.PI, Math.PI * 2);
+        context.stroke();
+      }
+
+      context.restore();
+    }
+
+    function drawSceneLaptop(context, x, y, width, height, label) {
+      context.save();
+      roundedPath(context, x, y, width, height, 14);
+      context.fillStyle = "rgba(4, 8, 40, .28)";
+      context.fill();
+      context.strokeStyle = "rgba(160, 242, 228, .46)";
+      context.lineWidth = 2;
+      context.stroke();
+
+      drawSceneCaption(context, label, x + width / 2, y + 30, width - 38, 22, "center", "#c8fbe8");
+
+      context.strokeStyle = "rgba(160, 242, 228, .62)";
+      context.lineWidth = 2.2;
+      context.beginPath();
+      context.moveTo(x + 28, y + 66);
+      context.lineTo(x + 58, y + 56);
+      context.lineTo(x + 82, y + 62);
+      context.lineTo(x + 108, y + 44);
+      context.lineTo(x + 138, y + 50);
+      context.lineTo(x + 154, y + 36);
+      context.stroke();
+      context.strokeStyle = "rgba(255, 207, 94, .72)";
+      context.lineWidth = 1.6;
+      context.beginPath();
+      context.moveTo(x + 26, y + height - 20);
+      context.lineTo(x + width - 26, y + height - 20);
+      context.stroke();
+
+      roundedPath(context, x - 14, y + height, width + 28, 14, 7);
+      context.strokeStyle = "rgba(80, 173, 255, .36)";
+      context.stroke();
+      context.restore();
+    }
+
+    function drawSceneBadge(context, x, y, width, height, label) {
+      context.save();
+      context.translate(x + width / 2, y + height / 2);
+      context.rotate(-0.12);
+      context.strokeStyle = "rgba(160, 242, 228, .42)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.moveTo(0, -height / 2 - 36);
+      context.lineTo(0, -height / 2);
+      context.stroke();
+
+      roundedPath(context, -width / 2, -height / 2, width, height, 17);
+      context.fillStyle = "rgba(7, 4, 38, .28)";
+      context.fill();
+      context.strokeStyle = "rgba(80, 173, 255, .44)";
+      context.stroke();
+      drawSceneCaption(context, label, 0, 1, width - 20, 15, "center", "#c8fbe8");
+
+      context.strokeStyle = "rgba(160, 242, 228, .34)";
+      context.beginPath();
+      context.moveTo(-width / 2 + 24, height / 2 - 18);
+      context.lineTo(width / 2 - 24, height / 2 - 18);
+      context.stroke();
+      context.restore();
+    }
+
+    function drawSceneDoor(context, x, y, width, height, label) {
+      context.save();
+      context.strokeStyle = "rgba(80, 173, 255, .46)";
+      context.lineWidth = 2.2;
+      context.beginPath();
+      context.moveTo(x + 18, y + height);
+      context.lineTo(x + 18, y + 48);
+      context.quadraticCurveTo(x + width / 2, y - 10, x + width - 18, y + 48);
+      context.lineTo(x + width - 18, y + height);
+      context.stroke();
+
+      context.beginPath();
+      context.moveTo(x + 34, y + height);
+      context.lineTo(x + 34, y + 52);
+      context.quadraticCurveTo(x + width / 2, y + 18, x + width - 34, y + 52);
+      context.lineTo(x + width - 34, y + height);
+      context.stroke();
+
+      roundedPath(context, x + 28, y + 58, width - 56, 44, 4);
+      context.fillStyle = "rgba(4, 8, 40, .34)";
+      context.fill();
+      context.strokeStyle = "rgba(255, 207, 94, .72)";
+      context.stroke();
+      context.beginPath();
+      context.moveTo(x + 28, y + 58);
+      context.lineTo(x + width / 2, y + 86);
+      context.lineTo(x + width - 28, y + 58);
+      context.stroke();
+      drawSceneCaption(context, label, x + width / 2, y + 78, width - 70, 22, "center", "#ffcf5e");
+
+      context.fillStyle = "rgba(255, 207, 94, .86)";
+      context.shadowColor = "rgba(255, 207, 94, .65)";
+      context.shadowBlur = 12;
+      context.beginPath();
+      context.arc(x + width - 30, y + height / 2 + 8, 4, 0, Math.PI * 2);
+      context.fill();
+      context.shadowBlur = 0;
+
+      context.strokeStyle = "rgba(160, 242, 228, .35)";
+      for (let index = 0; index < 3; index += 1) {
+        context.beginPath();
+        context.moveTo(x - 8 + index * 14, y + height + 8 + index * 8);
+        context.lineTo(x + width + 12 - index * 14, y + height + 8 + index * 8);
+        context.stroke();
+      }
+      context.restore();
+    }
+
+    function drawSceneAction(context, text, x, y, width, height) {
+      context.save();
+      context.translate(x + width / 2, y + height / 2);
+      context.rotate(-0.04);
+      const left = -width / 2;
+      const top = -height / 2;
+      context.beginPath();
+      context.moveTo(left, top);
+      context.lineTo(left + width - 34, top);
+      context.lineTo(left + width - 34, top + 8);
+      context.lineTo(left + width, 0);
+      context.lineTo(left + width - 34, top + height - 8);
+      context.lineTo(left + width - 34, top + height);
+      context.lineTo(left, top + height);
+      context.lineTo(left + 18, 0);
+      context.closePath();
+      context.fillStyle = "rgba(7, 4, 38, .46)";
+      context.fill();
+      context.strokeStyle = "rgba(160, 242, 228, .78)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.moveTo(left + 6, top + 2);
+      context.lineTo(left + width - 38, top + 2);
+      context.lineTo(left + width - 4, 0);
+      context.lineTo(left + width - 38, top + height - 2);
+      context.lineTo(left + 6, top + height - 2);
+      context.stroke();
+      drawSceneCaption(context, text, 6, 1, width - 44, 18, "center", "#c8fbe8");
+      context.restore();
+    }
+
+    function drawSceneSpark(context, x, y) {
+      context.save();
+      context.strokeStyle = "rgba(255, 207, 94, .62)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.moveTo(x, y - 8);
+      context.lineTo(x, y + 8);
+      context.moveTo(x - 8, y);
+      context.lineTo(x + 8, y);
+      context.stroke();
+      context.restore();
+    }
+
+    function drawSceneCaption(context, text, x, y, maxWidth, size, align, color) {
+      let fontSize = size;
+      context.textAlign = align;
+      context.textBaseline = "middle";
+      context.fillStyle = color;
+      do {
+        context.font = `950 ${fontSize}px Arial, 'PingFang SC', sans-serif`;
+        fontSize -= 1;
+      } while (context.measureText(text).width > maxWidth && fontSize >= 11);
+      context.fillText(text, x, y);
+    }
+
+    function drawPosterInsightBox(context, text, x, y, width, height) {
+      context.save();
+      roundedPath(context, x, y, width, height, 18);
+      context.fillStyle = "rgba(3, 9, 44, .34)";
+      context.fill();
+      context.strokeStyle = "rgba(160, 242, 228, .3)";
+      context.lineWidth = 2;
+      const corner = 28;
+      [
+        [x, y, 1, 1],
+        [x + width, y, -1, 1],
+        [x, y + height, 1, -1],
+        [x + width, y + height, -1, -1]
+      ].forEach(([cornerX, cornerY, directionX, directionY]) => {
+        context.beginPath();
+        context.moveTo(cornerX, cornerY + directionY * corner);
+        context.lineTo(cornerX, cornerY);
+        context.lineTo(cornerX + directionX * corner, cornerY);
+        context.stroke();
+      });
+
+      context.font = "900 27px 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif";
+      drawWrappedText(context, text, x + width / 2, y + 25, width - 88, 35, 2, "center", "#ffffff");
+      context.restore();
+    }
+
+    function drawPosterPersonalLabel(context, text, centerX, y) {
+      context.save();
+      context.font = "900 21px 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillStyle = "#c8fbe8";
+      context.shadowColor = "rgba(160, 242, 228, .42)";
+      context.shadowBlur = 12;
+      context.fillText(text, centerX, y);
+      context.strokeStyle = "rgba(160, 242, 228, .4)";
+      context.lineWidth = 1;
+      context.beginPath();
+      context.moveTo(centerX - 140, y);
+      context.lineTo(centerX - 88, y);
+      context.moveTo(centerX + 88, y);
+      context.lineTo(centerX + 140, y);
+      context.stroke();
+      context.restore();
+    }
+
+    function drawPosterSparkDivider(context, x, y, width) {
+      context.save();
+      context.strokeStyle = "rgba(80, 173, 255, .52)";
+      context.setLineDash([7, 7]);
+      context.beginPath();
+      context.moveTo(x, y);
+      context.lineTo(x + width, y);
+      context.stroke();
+      context.setLineDash([]);
+      drawSceneSpark(context, x + width / 2, y);
+      context.restore();
+    }
+
+    function drawPosterInfoRow(context, iconType, label, value, x, y, width, height) {
+      context.save();
+      roundedPath(context, x, y, width, height, height / 2);
+      context.fillStyle = "rgba(7, 4, 38, .5)";
+      context.fill();
+      context.shadowColor = "rgba(80, 173, 255, .48)";
+      context.shadowBlur = 16;
+      context.strokeStyle = "rgba(80, 173, 255, .72)";
+      context.lineWidth = 2;
+      context.stroke();
+      context.shadowBlur = 0;
+
+      drawPosterRowIcon(context, iconType, x + 34, y + height / 2, 42);
+
+      const textX = x + 82;
+      context.textBaseline = "middle";
+      context.textAlign = "left";
+      context.font = "900 24px Arial, 'PingFang SC', sans-serif";
+      context.fillStyle = "#c8fbe8";
+      context.shadowColor = "rgba(160, 242, 228, .45)";
+      context.shadowBlur = 12;
+      context.fillText(label, textX, y + height / 2 + 1);
+      const labelWidth = context.measureText(label).width;
+      drawFitLeftText(context, value, textX + labelWidth + 8, y + height / 2 + 1, 34, 22, x + width - (textX + labelWidth + 28));
+      context.restore();
+    }
+
+    function drawPosterResultPanel(context, report, action, x, y, width, height) {
+      const rows = [
+        ["star", "本次机会签：", report.drawName || "机会动不动"],
+        ["wand", "今日动作：", action]
+      ];
+
+      context.save();
+      roundedPath(context, x, y, width, height, 22);
+      context.fillStyle = "rgba(5, 13, 57, .56)";
+      context.fill();
+      context.shadowColor = "rgba(80, 173, 255, .42)";
+      context.shadowBlur = 18;
+      context.strokeStyle = "rgba(80, 173, 255, .72)";
+      context.lineWidth = 2;
+      context.stroke();
+      context.shadowBlur = 0;
+
+      context.strokeStyle = "rgba(160, 242, 228, .18)";
+      context.lineWidth = 1;
+      context.beginPath();
+      context.moveTo(x + 28, y + height / 2);
+      context.lineTo(x + width - 28, y + height / 2);
+      context.stroke();
+
+      rows.forEach(([icon, label, value], index) => {
+        const centerY = y + 42 + index * 80;
+        drawPosterSmallIcon(context, icon, x + 42, centerY);
+
+        context.textBaseline = "middle";
+        context.textAlign = "left";
+        context.font = "900 23px 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif";
+        context.fillStyle = "#c8fbe8";
+        context.shadowColor = "rgba(160, 242, 228, .4)";
+        context.shadowBlur = 10;
+        context.fillText(label, x + 76, centerY + 1);
+        const labelWidth = context.measureText(label).width;
+        drawFitLeftText(context, value, x + 76 + labelWidth + 8, centerY + 1, 32, 22, width - labelWidth - 126);
+      });
+      context.restore();
+    }
+
+    function drawPosterSmallIcon(context, type, x, y) {
+      context.save();
+      context.strokeStyle = "rgba(160, 242, 228, .86)";
+      context.fillStyle = "rgba(160, 242, 228, .86)";
+      context.lineWidth = 2.4;
+      context.shadowColor = "rgba(160, 242, 228, .5)";
+      context.shadowBlur = 10;
+
+      if (type === "wand") {
+        context.beginPath();
+        context.moveTo(x - 11, y + 12);
+        context.lineTo(x + 11, y - 12);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(x + 11, y - 18);
+        context.lineTo(x + 11, y - 7);
+        context.moveTo(x + 5, y - 13);
+        context.lineTo(x + 17, y - 13);
+        context.stroke();
+      } else {
+        context.beginPath();
+        context.moveTo(x, y - 17);
+        context.lineTo(x + 5, y - 5);
+        context.lineTo(x + 17, y);
+        context.lineTo(x + 5, y + 5);
+        context.lineTo(x, y + 17);
+        context.lineTo(x - 5, y + 5);
+        context.lineTo(x - 17, y);
+        context.lineTo(x - 5, y - 5);
+        context.closePath();
+        context.stroke();
+      }
+      context.restore();
+    }
+
+    function drawPosterRowIcon(context, type, centerX, centerY, size) {
+      context.save();
+      context.strokeStyle = "rgba(160, 242, 228, .8)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.arc(centerX, centerY, size / 2, 0, Math.PI * 2);
+      context.stroke();
+
+      if (type === "wand") {
+        context.beginPath();
+        context.moveTo(centerX - 10, centerY + 12);
+        context.lineTo(centerX + 10, centerY - 12);
+        context.stroke();
+        drawSceneSpark(context, centerX + 9, centerY - 15);
+      } else {
+        const points = [];
+        for (let index = 0; index < 5; index += 1) {
+          const angle = -Math.PI / 2 + index * (Math.PI * 2 / 5);
+          points.push([centerX + Math.cos(angle) * 15, centerY + Math.sin(angle) * 15]);
+        }
+        context.beginPath();
+        [0, 2, 4, 1, 3, 0].forEach((pointIndex, index) => {
+          const [pointX, pointY] = points[pointIndex];
+          if (index === 0) context.moveTo(pointX, pointY);
+          else context.lineTo(pointX, pointY);
+        });
+        context.stroke();
+      }
+      context.restore();
+    }
+
+    function drawFitLeftText(context, text, x, y, maxSize, minSize, maxWidth) {
+      let size = maxSize;
+      context.textAlign = "left";
+      context.textBaseline = "middle";
+      context.fillStyle = "#ffffff";
+      context.shadowColor = "rgba(80, 173, 255, .58)";
+      context.shadowBlur = 16;
+      do {
+        context.font = `900 ${size}px 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif`;
+        size -= 1;
+      } while (context.measureText(text).width > maxWidth && size >= minSize);
+      context.fillText(text, x, y);
+      context.shadowBlur = 0;
+    }
+
+    function drawPosterScriptStrip(context, report, x, y, width, height) {
+      context.save();
+      drawPosterDivider(context, x, y, width);
+      drawPosterDivider(context, x, y + height, width);
+
+      const labelWidth = 116;
+      roundedPath(context, x, y + 18, labelWidth, 30, 15);
+      context.fillStyle = "rgba(33, 115, 255, .18)";
+      context.fill();
+      context.strokeStyle = "rgba(160, 242, 228, .4)";
+      context.stroke();
+      context.font = "900 17px Arial, 'PingFang SC', sans-serif";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillStyle = "#c8fbe8";
+      context.fillText("本次机会签", x + labelWidth / 2, y + 34);
+
+      context.font = "900 27px Arial, 'PingFang SC', sans-serif";
+      context.textAlign = "left";
+      context.fillStyle = "#ffffff";
+      context.shadowColor = "rgba(80, 173, 255, .42)";
+      context.shadowBlur = 14;
+      context.fillText(report.drawName || "机会动不动", x + labelWidth + 18, y + 35);
+      context.shadowBlur = 0;
+
+      context.font = "900 22px Arial, 'PingFang SC', sans-serif";
+      drawWrappedText(context, report.drawOracle, x, y + 62, width, 28, 2, "left", "rgba(255, 255, 255, .88)");
+      drawPosterActionSeal(context, `今日动作：${report.actions?.[0] || "让入口可见"}`, x, y + 108, 238, 30);
+      context.restore();
+    }
+
+    function drawPosterActionSeal(context, text, x, y, width, height) {
+      const gradient = context.createLinearGradient(x, y, x + width, y);
+      gradient.addColorStop(0, "#c8fbe8");
+      gradient.addColorStop(1, "#7fdcff");
+      roundedPath(context, x, y, width, height, height / 2);
+      context.fillStyle = gradient;
+      context.fill();
+      context.font = "950 17px Arial, 'PingFang SC', sans-serif";
+      context.textAlign = "left";
+      context.textBaseline = "middle";
+      context.fillStyle = "#0a0532";
+      let size = 17;
+      do {
+        context.font = `950 ${size}px Arial, 'PingFang SC', sans-serif`;
+        size -= 1;
+      } while (context.measureText(text).width > width - 30 && size >= 13);
+      context.fillText(text, x + 15, y + height / 2 + 1);
+    }
+
+    function drawFitText(context, text, x, y, maxSize, minSize, maxWidth) {
+      let size = maxSize;
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillStyle = "#ffffff";
+      context.shadowColor = "rgba(80, 173, 255, .95)";
+      context.shadowBlur = 18;
+      do {
+        context.font = `900 ${size}px 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif`;
+        size -= 2;
+      } while (context.measureText(text).width > maxWidth && size >= minSize);
+      context.fillText(text, x, y);
+      context.shadowBlur = 0;
+    }
+
+    function drawWrappedText(context, text, x, y, maxWidth, lineHeight, maxLines, align = "left", color = "#ffffff") {
+      const chars = [...String(text || "")];
+      const lines = [];
+      let line = "";
+
+      chars.forEach(char => {
+        const nextLine = `${line}${char}`;
+        if (context.measureText(nextLine).width > maxWidth && line) {
+          lines.push(line);
+          line = char;
+        } else {
+          line = nextLine;
+        }
+      });
+      if (line) lines.push(line);
+      if (lines.length > maxLines) {
+        lines.length = maxLines;
+        lines[maxLines - 1] = `${[...lines[maxLines - 1]].slice(0, -2).join("")}...`;
+      }
+
+      context.textAlign = align;
+      context.textBaseline = "top";
+      context.fillStyle = color;
+      context.shadowColor = "rgba(80, 173, 255, .28)";
+      context.shadowBlur = 12;
+      lines.forEach((item, index) => {
+        context.fillText(item, x, y + index * lineHeight);
+      });
+      context.shadowBlur = 0;
+      return y + lines.length * lineHeight;
+    }
+
+    function drawRatingPill(context, label, value, x, y, width, height) {
+      roundedPath(context, x, y, width, height, height / 2);
+      context.fillStyle = "rgba(6, 9, 47, .56)";
+      context.fill();
+      context.strokeStyle = "rgba(200, 251, 232, .24)";
+      context.stroke();
+      context.font = "900 18px Arial, 'PingFang SC', sans-serif";
+      context.textBaseline = "middle";
+      context.textAlign = "left";
+      context.fillStyle = "#ffffff";
+      context.fillText(label, x + 28, y + height / 2 + 1);
+      context.textAlign = "right";
+      context.fillStyle = "#c8fbe8";
+      context.fillText(value, x + width - 28, y + height / 2 + 1);
+    }
+
+    function drawPosterDivider(context, x, y, width) {
+      const gradient = context.createLinearGradient(x, y, x + width, y);
+      gradient.addColorStop(0, "rgba(160, 242, 228, 0)");
+      gradient.addColorStop(.5, "rgba(160, 242, 228, .5)");
+      gradient.addColorStop(1, "rgba(160, 242, 228, 0)");
+      context.strokeStyle = gradient;
+      context.lineWidth = 1;
+      context.beginPath();
+      context.moveTo(x, y);
+      context.lineTo(x + width, y);
+      context.stroke();
+    }
+
+    function drawPosterQrCta(context, width, height) {
+      const qrBox = 82;
+      const qrInner = 64;
+      const qrX = width / 2 - qrBox / 2;
+      const qrY = 838;
+
+      context.save();
+      roundedPath(context, qrX, qrY, qrBox, qrBox, 15);
+      context.fillStyle = "rgba(255, 255, 255, .96)";
+      context.fill();
+      context.shadowColor = "rgba(80, 173, 255, .36)";
+      context.shadowBlur = 10;
+      context.strokeStyle = "rgba(255, 255, 255, .72)";
+      context.lineWidth = 1.5;
+      context.stroke();
+      context.shadowBlur = 0;
+      context.imageSmoothingEnabled = false;
+      context.drawImage(posterQrCanvas, qrX + (qrBox - qrInner) / 2, qrY + (qrBox - qrInner) / 2, qrInner, qrInner);
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+
+      context.font = "900 18px 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillStyle = "rgba(200, 251, 232, .88)";
+      context.shadowColor = "rgba(80, 173, 255, .34)";
+      context.shadowBlur = 9;
+      context.fillText("扫码给自己也起一卦", width / 2, qrY + qrBox + 27);
+      context.restore();
+    }
+
+    function drawPosterQrBlock(context, width, height) {
+      const qrX = 92;
+      const qrY = height - 150;
+      roundedPath(context, qrX, qrY, 88, 88, 16);
+      context.fillStyle = "rgba(255, 255, 255, .96)";
+      context.fill();
+      context.drawImage(posterQrCanvas, qrX + 9, qrY + 9, 70, 70);
+      context.font = "900 22px Arial, 'PingFang SC', sans-serif";
+      drawWrappedText(
+        context,
+        "扫码围观我的打工人格，顺手给自己也起一卦。",
+        202,
+        qrY + 18,
+        width - 266,
+        31,
+        2,
+        "left",
+        "#ffffff"
+      );
+    }
+
+    function roundedPath(context, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      context.beginPath();
+      context.moveTo(x + r, y);
+      context.lineTo(x + width - r, y);
+      context.quadraticCurveTo(x + width, y, x + width, y + r);
+      context.lineTo(x + width, y + height - r);
+      context.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+      context.lineTo(x + r, y + height);
+      context.quadraticCurveTo(x, y + height, x, y + height - r);
+      context.lineTo(x, y + r);
+      context.quadraticCurveTo(x, y, x + r, y);
+      context.closePath();
     }
 
     function escapeHTML(value) {
@@ -4354,25 +5889,33 @@
       return "别只转发好运，也要给好运留一个能找到你的入口。";
     }
 
-    function runLoading() {
+    async function runLoading() {
+      const runId = ++loadingRunId;
       let index = 0;
       const text = document.querySelector("#loadingText");
       const fill = document.querySelector("#loadingFill");
+      const reportPromise = buildReport();
       text.textContent = loadingMessages[0];
       fill.style.width = "8%";
 
-      const timer = setInterval(() => {
-        index += 1;
-        const progress = Math.min(100, (index + 1) * 20);
-        fill.style.width = `${progress}%`;
-        text.textContent = loadingMessages[Math.min(index, loadingMessages.length - 1)];
+      await new Promise(resolve => {
+        const timer = setInterval(() => {
+          index += 1;
+          const progress = Math.min(100, (index + 1) * 20);
+          fill.style.width = `${progress}%`;
+          text.textContent = loadingMessages[Math.min(index, loadingMessages.length - 1)];
 
-        if (index >= loadingMessages.length) {
-          clearInterval(timer);
-          buildReport();
-          showScreen("reportScreen");
-        }
-      }, 760);
+          if (index >= loadingMessages.length) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 760);
+      });
+
+      const report = await reportPromise;
+      if (runId !== loadingRunId) return;
+      renderReport(report);
+      showScreen("reportScreen");
     }
 
     document.addEventListener("click", event => {
@@ -4519,7 +6062,6 @@
     musicToggle.addEventListener("click", toggleMusic);
     document.addEventListener("pointerdown", primeDefaultMusic, { once: true, passive: true });
     document.addEventListener("keydown", primeDefaultMusic, { once: true });
-    shareGuideClose.addEventListener("click", closeShareGuide);
     shareGuide.addEventListener("click", event => {
       if (event.target === shareGuide) closeShareGuide();
     });
@@ -4566,13 +6108,22 @@
       shareGuide.setAttribute("aria-hidden", "true");
     }
 
-    function startPosterPress() {
+    function startPosterPress(event) {
+      if (posterArea.classList.contains("is-save-ready") && event.target === posterSaveImage) {
+        clearTimeout(posterPressTimer);
+        posterArea.classList.remove("is-pressing");
+        return;
+      }
+
       clearTimeout(posterPressTimer);
+      if (!posterSaveImage.getAttribute("src") && lastPosterReport) {
+        refreshPosterAssets(lastPosterReport);
+      }
       posterArea.classList.add("is-pressing");
       posterPressTimer = setTimeout(() => {
         posterArea.classList.remove("is-pressing");
         playSfx("save");
-        showToast("保存姿势已点亮：正式上线可合成为图片后长按存相册");
+        showToast("海报图片已生成，长按图片即可保存到相册");
       }, LONG_PRESS_MS);
     }
 

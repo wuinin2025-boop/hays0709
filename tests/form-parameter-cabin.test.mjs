@@ -35,6 +35,8 @@ const html = readFileSync(new URL("../瀚纳仕H5 demo-启动舱.html", import.m
 
 assert.doesNotMatch(html, /class="select-proxy-arrow"/);
 assert.match(html, /\.parameter-selector-arrow\s*\{/);
+assert.match(html, /\.parameter-selector-values\s*\{[\s\S]*?grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/);
+assert.doesNotMatch(html, /grid-template-columns: 2fr 1fr 1fr;/);
 assert.match(html, /<div class="select-picker-columns" id="selectPickerColumns">/);
 assert.match(html, /\.select-picker-column\s*\{/);
 assert.match(html, /\.select-picker-column-options\s*\{/);

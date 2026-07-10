@@ -136,7 +136,7 @@ require_ubuntu() {
     source /etc/os-release
     [[ "${ID:-}" == "ubuntu" ]] || die "Ubuntu is required (detected: ${ID:-unknown})"
     local major_version="${VERSION_ID%%.*}"
-    [[ "$major_version" =~ ^[0-9]+$ && major_version -ge 22 ]] \
+    [[ "$major_version" =~ ^[0-9]+$ && "$major_version" -ge 22 ]] \
         || die "Ubuntu 22.04 or newer is required (detected: ${VERSION_ID:-unknown})"
 }
 
@@ -193,20 +193,33 @@ render_nginx_config() {
     printf '%s\n' "$rendered"
 }
 
+ensure_nginx_site_link() {
+    if [[ -L "$ENABLED_LINK" ]]; then
+        local link_target
+        link_target="$(readlink -f "$ENABLED_LINK" || true)"
+        [[ "$link_target" == "$CONFIG_PATH" ]] \
+            || die "$ENABLED_LINK points to a different Nginx configuration"
+    elif [[ -e "$ENABLED_LINK" ]]; then
+        die "$ENABLED_LINK exists and is not the managed site symlink"
+    else
+        ln -s "$CONFIG_PATH" "$ENABLED_LINK"
+    fi
+}
+
 install_nginx_config() {
     if [[ -e "$CONFIG_PATH" || -L "$CONFIG_PATH" ]]; then
         grep -Fq "# hays0709 managed configuration" "$CONFIG_PATH" \
             || die "$CONFIG_PATH exists but is not managed by this deployment"
         grep -Eq "server_name[[:space:]]+[^;]*${DOMAIN}([[:space:]]|;)" "$CONFIG_PATH" \
             || die "$CONFIG_PATH has a different server_name; resolve it manually before deploying"
-        [[ -L "$ENABLED_LINK" || -e "$ENABLED_LINK" ]] || ln -s "$CONFIG_PATH" "$ENABLED_LINK"
+        ensure_nginx_site_link
         return
     fi
 
     local candidate="$TMP_ROOT/nginx.conf.candidate"
     render_nginx_config > "$candidate"
     install -m 644 "$candidate" "$CONFIG_PATH"
-    ln -s "$CONFIG_PATH" "$ENABLED_LINK"
+    ensure_nginx_site_link
 
     if ! nginx -t; then
         rm -f -- "$ENABLED_LINK" "$CONFIG_PATH"

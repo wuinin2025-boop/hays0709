@@ -141,10 +141,7 @@ require_ubuntu() {
 }
 
 ensure_packages() {
-    local required=(git nginx rsync curl)
-    if ((ENABLE_HTTPS == 1)); then
-        required+=(certbot python3-certbot-nginx)
-    fi
+    local required=(git nginx rsync curl iproute2)
 
     local missing=()
     local package
@@ -165,7 +162,45 @@ ensure_packages() {
     command -v nginx >/dev/null || die "nginx is unavailable"
     command -v rsync >/dev/null || die "rsync is unavailable"
     command -v curl >/dev/null || die "curl is unavailable"
+    command -v ss >/dev/null || die "ss is unavailable"
     command -v systemctl >/dev/null || die "systemd/systemctl is required"
+}
+
+ensure_https_packages() {
+    ((ENABLE_HTTPS == 1)) || return 0
+
+    local required=(certbot python3-certbot-nginx)
+    local missing=()
+    local package
+    for package in "${required[@]}"; do
+        if ! dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed'; then
+            missing+=("$package")
+        fi
+    done
+
+    if ((${#missing[@]} > 0)); then
+        log "installing missing HTTPS packages: ${missing[*]}"
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update
+        apt-get install -y "${missing[@]}"
+    fi
+
+    command -v certbot >/dev/null || die "certbot is unavailable"
+}
+
+detect_https_port_conflict() {
+    ((ENABLE_HTTPS == 1)) || return 0
+    command -v ss >/dev/null 2>&1 || die "ss is required to inspect port 443"
+
+    local listeners
+    listeners="$(ss -H -ltnp 'sport = :443' 2>/dev/null || true)"
+    [[ -n "$listeners" ]] || return 0
+    if grep -qi 'nginx' <<<"$listeners"; then
+        return 0
+    fi
+
+    printf '%s\n' "$listeners" >&2
+    die "Port 443 is occupied by a non-Nginx service. If it is x-ui/Xray, deploy HTTP first, then run: sudo bash scripts/configure-xray-fallback.sh --domain $DOMAIN"
 }
 
 resolve_repository() {
@@ -472,6 +507,8 @@ main() {
     TMP_ROOT="$(mktemp -d -t "${SITE_NAME}.XXXXXX")"
 
     ensure_packages
+    detect_https_port_conflict
+    ensure_https_packages
     prepare_directories
 
     if ((ROLLBACK == 1)); then

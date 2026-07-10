@@ -37,6 +37,41 @@ sudo bash scripts/deploy.sh --domain example.com --https --email admin@example.c
 
 `--email` 是 Certbot 的证书联系邮箱，不能省略。脚本使用非交互模式申请证书，并配置 HTTP 到 HTTPS 跳转。证书和私钥保存在服务器的 `/etc/letsencrypt/`，不会进入 Git。
 
+### 服务器 443 已被 x-ui/Xray 占用
+
+如果服务器已经用 x-ui/Xray 在公网 `443` 提供 VLESS + TLS，不要停止 Xray，也不要运行普通的 `--https` 部署覆盖它。新版部署脚本会在 Certbot 执行前检测端口冲突，并提示使用共存脚本。
+
+先完成普通 HTTP 部署，再执行：
+
+```bash
+sudo bash scripts/deploy.sh --domain wuininyyy2026.xyz
+sudo bash scripts/configure-xray-fallback.sh --domain wuininyyy2026.xyz
+```
+
+共存脚本要求 x-ui 中已经存在一个启用的 `443` VLESS + TLS 入站，并且该入站已经配置域名证书。脚本不会申请或替换 Xray 证书，而是：
+
+- 保留 Xray 监听公网 `443`，现有代理客户端不受影响；
+- 将普通浏览器的 ALPN `h2` 流量回落到 Nginx `127.0.0.1:8444`；
+- 将 `http/1.1` 和默认流量回落到 Nginx `127.0.0.1:8443`；
+- 让公网 `80` 继续由 Nginx 监听并跳转到 HTTPS；
+- 修改前备份 `/etc/nginx/sites-available/hays0709.conf` 和 x-ui 数据库，验证失败时自动回滚。
+
+默认数据库路径是 `/etc/x-ui/x-ui.db`。如安装位置不同，或内部端口已占用，可显式指定：
+
+```bash
+sudo bash scripts/configure-xray-fallback.sh \
+  --domain example.com \
+  --x-ui-db /etc/x-ui/x-ui.db \
+  --http1-port 8443 \
+  --http2-port 8444
+```
+
+配置成功后，后续更新网页只需运行普通部署命令，不要再附加 `--https`：
+
+```bash
+sudo bash scripts/deploy.sh --domain wuininyyy2026.xyz --branch main
+```
+
 ### 更新、指定版本和回滚
 
 从仓库目录再次执行即可更新：
@@ -79,6 +114,7 @@ ls -la /opt/hays0709/releases
 
 - **域名访问到默认 Nginx 页面**：确认 DNS 已指向该服务器，并检查 `sudo nginx -t`、站点配置中的 `server_name` 和 80 端口安全组。
 - **HTTPS 申请失败**：确认域名已解析到本机、80/443 没有被其他服务占用，且 Certbot 能从公网完成验证。
+- **提示 `Port 443 is occupied`**：使用 `sudo ss -ltnp | grep ':443'` 确认占用者。如果是 x-ui/Xray，请按上面的共存步骤运行 `scripts/configure-xray-fallback.sh`，不要停止仍有代理客户端使用的 Xray。
 - **提示 `server_name` 不一致**：脚本不会覆盖同名但非本项目管理的配置。请先检查 `/etc/nginx/sites-available/hays0709.conf`，确认域名后再运行。
 - **更新失败**：脚本在健康检查失败时会恢复原来的 `current`。检查 Nginx 日志和 `/opt/hays0709/releases` 后，可再次执行 `--rollback`。
 

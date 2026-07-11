@@ -71,6 +71,7 @@ for (const flag of ["--domain", "--x-ui-db", "--http1-port", "--http2-port"]) {
 assert.match(xrayFallback, /location \^~ \/api\/fortune/);
 assert.match(xrayFallback, /proxy_pass http:\/\/127\.0\.0\.1:5173/);
 assert.match(xrayFallback, /APP_PATH="\/hays"/);
+assert.match(xrayFallback, /try_files "\/[$][{]INDEX_FILE[}]" =404;/);
 
 for (const marker of [
   "inbound_fallbacks",
@@ -106,6 +107,7 @@ assert.match(nginx, /return 302 \/hays\/;/);
 assert.match(nginx, /location = \/hays \{/);
 assert.match(nginx, /return 301 \/hays\/;/);
 assert.match(nginx, /location = \/hays\/ \{/);
+assert.match(nginx, /try_files "\/__INDEX_FILE__" =404;/);
 assert.match(nginx, /location \^~ \/hays\/assets\//);
 assert.match(nginx, /location \^~ \/hays\//);
 assert.match(nginx, /rewrite \^\/hays\/\(\.\*\)\$ \/\$1 break;/);

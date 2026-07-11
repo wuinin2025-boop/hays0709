@@ -213,7 +213,7 @@ server {
     }
 
     location = ${APP_PATH}/ {
-        try_files /${INDEX_FILE} =404;
+        try_files "/${INDEX_FILE}" =404;
     }
 
     location ^~ ${APP_PATH}/assets/ {

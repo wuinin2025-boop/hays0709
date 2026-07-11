@@ -336,7 +336,9 @@ PY
 }
 
 ensure_nginx_hays_path() {
-    if grep -Fq "location = ${APP_PATH} {" "$CONFIG_PATH" && grep -Fq "location ^~ ${APP_PATH}/" "$CONFIG_PATH"; then
+    if grep -Fq "location = ${APP_PATH} {" "$CONFIG_PATH" &&
+        grep -Fq "location ^~ ${APP_PATH}/" "$CONFIG_PATH" &&
+        grep -Fq "try_files \"/${INDEX_FILE}\" =404;" "$CONFIG_PATH"; then
         return 0
     fi
 
@@ -362,7 +364,7 @@ path_routes = f"""    location = / {{
     }}
 
     location = {app_path}/ {{
-        try_files /{index_file} =404;
+        try_files "/{index_file}" =404;
     }}
 
     location ^~ {app_path}/assets/ {{
@@ -384,10 +386,17 @@ path_routes = f"""    location = / {{
     }}
 """
 
-if old_root not in source:
+legacy_index = f"try_files /{index_file} =404;"
+quoted_index = f'try_files "/{index_file}" =404;'
+
+if legacy_index in source:
+    source = source.replace(legacy_index, quoted_index, 1)
+elif old_root in source:
+    source = source.replace(old_root, path_routes, 1)
+else:
     raise SystemExit("managed Nginx config has no legacy root try_files location to replace")
 
-target_path.write_text(source.replace(old_root, path_routes, 1), encoding="utf-8")
+target_path.write_text(source, encoding="utf-8")
 PY
     cp -a "$CONFIG_PATH" "$backup"
     install -m 644 "$candidate" "$CONFIG_PATH"

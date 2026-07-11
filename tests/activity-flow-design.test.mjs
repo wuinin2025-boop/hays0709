@@ -138,6 +138,8 @@ assert.match(html, /\.poster-metric-list,\n    \.poster-risk \{\n[\s\S]*?display
 assert.match(html, /\.poster-save-image \{\n[\s\S]*?-webkit-touch-callout: default;/);
 assert.match(html, /\.poster-save-image \{\n[\s\S]*?pointer-events: auto;/);
 assert.match(html, /\.poster-board\.is-save-ready \{\n[\s\S]*?touch-action: auto;[\s\S]*?-webkit-user-select: auto;/);
+assert.match(html, /\.poster-board\.is-rendering \.poster-aura,\n    \.poster-board\.is-rendering \.poster-card \{\n[\s\S]*?display: none;/);
+assert.match(html, /\.poster-board\.is-rendering::before \{\n[\s\S]*?海报生成中/);
 assert.doesNotMatch(html, /poster-save-tip/);
 assert.doesNotMatch(html, /长按点亮保存姿势/);
 assert.match(html, /长按海报图片保存到相册/);
@@ -180,6 +182,8 @@ assert.match(html, /if \(posterAssetsReport === report \|\| pendingPosterAssetsR
 assert.match(html, /ensurePosterAssets\(lastPosterReport\);/);
 assert.match(html, /pendingPosterAssetsReport = report;/);
 assert.match(html, /posterAssetsReport = report;/);
+assert.match(html, /posterArea\.classList\.add\("is-rendering"\);/);
+assert.match(html, /posterArea\.classList\.remove\("is-rendering"\);/);
 assert.doesNotMatch(html, /context\.fillText\("长按保存海报"/);
 assert.match(html, /const LONG_PRESS_MS = 650;/);
 assert.match(html, /function startPosterPress\(event\)/);

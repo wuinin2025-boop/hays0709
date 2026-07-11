@@ -2640,6 +2640,21 @@
       user-select: auto;
     }
 
+    .poster-board.is-rendering {
+      min-height: 1000px;
+      display: grid;
+      place-items: center;
+    }
+
+    .poster-board.is-rendering::before {
+      content: "海报生成中";
+      color: rgba(200, 251, 232, .74);
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-shadow: 0 0 18px rgba(80, 173, 255, .28);
+    }
+
     .poster-ritual-screen .poster-board.is-pressing {
       transform: scale(.985);
       filter: drop-shadow(0 0 44px rgba(160, 242, 228, .38));
@@ -2665,7 +2680,9 @@
     }
 
     .poster-board.is-save-ready .poster-aura,
-    .poster-board.is-save-ready .poster-card {
+    .poster-board.is-save-ready .poster-card,
+    .poster-board.is-rendering .poster-aura,
+    .poster-board.is-rendering .poster-card {
       display: none;
     }
 
@@ -4932,6 +4949,7 @@
       pendingPosterAssetsReport = report;
       posterAssetsReport = undefined;
       posterArea.classList.remove("is-save-ready");
+      posterArea.classList.add("is-rendering");
       renderPosterQr()
         .then(() => {
           if (runId === posterRenderRunId) {
@@ -5052,6 +5070,7 @@
         drawPosterQrCta(context, width, height);
 
         posterSaveImage.src = canvas.toDataURL("image/png");
+        posterArea.classList.remove("is-rendering");
         posterArea.classList.add("is-save-ready");
         pendingPosterAssetsReport = undefined;
         posterAssetsReport = report;
@@ -5059,6 +5078,7 @@
         if (activeRunId === posterRenderRunId) {
           pendingPosterAssetsReport = undefined;
           posterAssetsReport = undefined;
+          posterArea.classList.remove("is-rendering");
         }
         throw error;
       });

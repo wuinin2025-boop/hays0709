@@ -338,7 +338,8 @@ PY
 ensure_nginx_hays_path() {
     if grep -Fq "location = ${APP_PATH} {" "$CONFIG_PATH" &&
         grep -Fq "location ^~ ${APP_PATH}/" "$CONFIG_PATH" &&
-        grep -Fq "try_files \"/${INDEX_FILE}\" =404;" "$CONFIG_PATH"; then
+        grep -Fq "try_files \"/${INDEX_FILE}\" =404;" "$CONFIG_PATH" &&
+        grep -Fq "absolute_redirect off;" "$CONFIG_PATH"; then
         return 0
     fi
 
@@ -395,6 +396,9 @@ elif old_root in source:
     source = source.replace(old_root, path_routes, 1)
 else:
     raise SystemExit("managed Nginx config has no legacy root try_files location to replace")
+
+if "absolute_redirect off;" not in source:
+    source = source.replace("    charset utf-8;\n", "    charset utf-8;\n    absolute_redirect off;\n", 1)
 
 target_path.write_text(source, encoding="utf-8")
 PY

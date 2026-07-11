@@ -184,6 +184,7 @@ server {
     root ${SITE_ROOT};
     index "${INDEX_FILE}";
     charset utf-8;
+    absolute_redirect off;
 
     gzip on;
     gzip_min_length 1024;

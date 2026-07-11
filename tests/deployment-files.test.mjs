@@ -71,6 +71,7 @@ for (const flag of ["--domain", "--x-ui-db", "--http1-port", "--http2-port"]) {
 assert.match(xrayFallback, /location \^~ \/api\/fortune/);
 assert.match(xrayFallback, /proxy_pass http:\/\/127\.0\.0\.1:5173/);
 assert.match(xrayFallback, /APP_PATH="\/hays"/);
+assert.match(xrayFallback, /absolute_redirect off;/);
 assert.match(xrayFallback, /try_files "\/[$][{]INDEX_FILE[}]" =404;/);
 
 for (const marker of [
@@ -100,6 +101,7 @@ for (const placeholder of ["__DOMAIN__", "__SITE_ROOT__", "__INDEX_FILE__"]) {
 }
 
 assert.match(nginx, /gzip on;/);
+assert.match(nginx, /absolute_redirect off;/);
 assert.match(nginx, /location \^~ \/api\/fortune/);
 assert.match(nginx, /proxy_pass http:\/\/127\.0\.0\.1:5173/);
 assert.match(nginx, /location = \/ \{/);

@@ -1,6 +1,6 @@
 # 瀚纳仕 AI 打工命盘 H5
 
-这是一个瀚纳仕 AI 打工命盘 H5 项目，生产入口为 `瀚纳仕H5 demo-启动舱.html`。页面可以在没有接口时使用本地兜底文案；如果要让“AI 算卦”每次生成不同标题和内容，需要通过 `server.mjs` 启动同源 API 代理，由服务端读取 API Key 后请求模型接口。
+这是一个瀚纳仕 AI 打工命盘 H5 项目，生产入口为 `瀚纳仕H5 demo-启动舱.html`。线上页面路径为 `/hays/`，例如 `https://wuininyyy2026.xyz/hays/`；根路径 `/` 会临时跳转到 `/hays/`，方便旧入口继续访问。页面可以在没有接口时使用本地兜底文案；如果要让“AI 算卦”每次生成不同标题和内容，需要通过 `server.mjs` 启动同源 API 代理，由服务端读取 API Key 后请求模型接口。
 
 不要把 API Key 写进 HTML、脚本或 Git 仓库。请在服务器环境变量里配置密钥，本仓库只保留 `.env.example` 占位示例。
 
@@ -41,6 +41,8 @@ curl https://你的域名/api/fortune/status
 
 部署脚本会自动安装 Node.js 22（服务器已有 Node.js 18+ 时复用现有版本），注册 `hays0709.service` 常驻运行 `server.mjs`，并让 Nginx 把 `/api/fortune` 反代到本机 `127.0.0.1:5173`。页面文件和 AI 接口因此使用同一个域名访问，服务器不需要向公网开放 `5173`。
 
+Hays 页面挂在 `/hays/`，AI 接口仍保留在 `/api/fortune` 和 `/api/fortune/status`，这样后续可以继续把其他项目放到 `/project-name/` 这类独立路径下。
+
 ### 部署前准备
 
 服务器需要满足：
@@ -79,7 +81,7 @@ cd hays0709
 sudo bash scripts/deploy.sh --domain example.com
 ```
 
-将 `example.com` 换成实际域名。脚本会生成 `/etc/nginx/sites-available/hays0709.conf`，启用站点，校验 `nginx -t`，启动或重载 Nginx，并检查域名虚拟主机是否返回 HTTP 200 且包含 `今天的班`。
+将 `example.com` 换成实际域名。脚本会生成 `/etc/nginx/sites-available/hays0709.conf`，启用站点，校验 `nginx -t`，启动或重载 Nginx，并检查域名虚拟主机的 `/hays/` 是否返回 HTTP 200 且包含 `今天的班`。
 
 ### 首次部署 HTTPS
 
@@ -125,6 +127,12 @@ sudo bash scripts/configure-xray-fallback.sh \
 ```bash
 sudo bash scripts/deploy.sh --domain wuininyyy2026.xyz --branch main
 ```
+
+当前线上访问地址：
+
+- Hays H5：`https://wuininyyy2026.xyz/hays/`
+- 根路径：`https://wuininyyy2026.xyz/` 会跳转到 `/hays/`
+- AI 状态接口：`https://wuininyyy2026.xyz/api/fortune/status`
 
 ### 更新、指定版本和回滚
 
@@ -176,7 +184,7 @@ ls -la /opt/hays0709
 ls -la /opt/hays0709/releases
 ```
 
-正常情况下 `/opt/hays0709/current` 指向当前 release，`/opt/hays0709/previous` 指向上一 release。Nginx 配置会保留在 `/etc/nginx/sites-available/hays0709.conf`，后续部署不会覆盖 Certbot 添加的 HTTPS 配置。
+正常情况下 `/opt/hays0709/current` 指向当前 release，`/opt/hays0709/previous` 指向上一 release。Nginx 配置会保留在 `/etc/nginx/sites-available/hays0709.conf`，后续部署会把本项目管理的配置升级到 `/hays/` 路由，并保留 x-ui/Xray fallback 所需的 loopback 监听。
 
 ### 常见问题
 

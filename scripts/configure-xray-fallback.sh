@@ -9,6 +9,7 @@ readonly CONFIG_PATH="/etc/nginx/sites-available/${SITE_NAME}.conf"
 readonly ENABLED_LINK="/etc/nginx/sites-enabled/${SITE_NAME}.conf"
 readonly SITE_ROOT="/opt/${SITE_NAME}/current"
 readonly INDEX_FILE="瀚纳仕H5 demo-启动舱.html"
+readonly APP_PATH="/hays"
 readonly BACKUP_ROOT="/root/${SITE_NAME}-server-backups"
 readonly XRAY_CONFIG="/usr/local/x-ui/bin/config.json"
 
@@ -203,8 +204,34 @@ server {
         proxy_send_timeout 60s;
     }
 
-    location / {
+    location = / {
+        return 302 ${APP_PATH}/;
+    }
+
+    location = ${APP_PATH} {
+        return 301 ${APP_PATH}/;
+    }
+
+    location = ${APP_PATH}/ {
+        try_files /${INDEX_FILE} =404;
+    }
+
+    location ^~ ${APP_PATH}/assets/ {
+        rewrite ^${APP_PATH}/(.*)$ /\$1 break;
+        try_files \$uri =404;
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800, immutable" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    }
+
+    location ^~ ${APP_PATH}/ {
+        rewrite ^${APP_PATH}/(.*)$ /\$1 break;
         try_files \$uri \$uri/ =404;
+    }
+
+    location / {
+        return 404;
     }
 
     location ~* \.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?)\$ {
@@ -362,13 +389,13 @@ verify_nginx_fallbacks() {
     curl --http1.1 --silent --show-error --fail --max-time 15 \
         --header "Host: $DOMAIN" \
         --output "$http1_body" \
-        "http://127.0.0.1:$HTTP1_PORT/"
+        "http://127.0.0.1:$HTTP1_PORT$APP_PATH/"
     check_page "$http1_body"
 
     curl --http2-prior-knowledge --silent --show-error --fail --max-time 15 \
         --header "Host: $DOMAIN" \
         --output "$http2_body" \
-        "http://127.0.0.1:$HTTP2_PORT/"
+        "http://127.0.0.1:$HTTP2_PORT$APP_PATH/"
     check_page "$http2_body"
     rm -f -- "$http1_body" "$http2_body"
 }
@@ -379,7 +406,7 @@ verify_public_https() {
     curl --http1.1 --silent --show-error --fail --max-time 20 \
         --resolve "$DOMAIN:443:127.0.0.1" \
         --output "$body" \
-        "https://$DOMAIN/"
+        "https://$DOMAIN$APP_PATH/"
     check_page "$body"
     rm -f -- "$body"
 }
@@ -403,7 +430,7 @@ main() {
 
     ROLLBACK_ARMED=0
     log "Xray fallback is active; backup retained at $BACKUP_DIR"
-    log "HTTPS verified: https://$DOMAIN/"
+    log "HTTPS verified: https://$DOMAIN$APP_PATH/"
 }
 
 main "$@"

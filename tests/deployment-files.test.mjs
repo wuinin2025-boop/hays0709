@@ -44,10 +44,13 @@ assert.match(deploy, /server\.mjs/);
 assert.match(deploy, /hays0709\.service/);
 assert.match(deploy, /systemctl[\s\S]*daemon-reload/);
 assert.match(deploy, /systemctl restart "\$SERVICE_NAME"/);
+assert.match(deploy, /APP_PATH="\/hays"/);
 assert.match(deploy, /api_proxy_health_check/);
 assert.match(deploy, /public_api_health_check/);
 assert.match(deploy, /seq 1 20/);
 assert.match(deploy, /\/api\/fortune/);
+assert.match(deploy, /\$APP_PATH\//);
+assert.match(deploy, /ensure_nginx_hays_path/);
 assert.match(deploy, /--include='server\.mjs'/);
 const mainBody = deploy.match(/main\(\)\s*\{([\s\S]*?)\n\}/)?.[1] ?? "";
 assert.match(deploy, /ensure_https_packages/);
@@ -67,6 +70,7 @@ for (const flag of ["--domain", "--x-ui-db", "--http1-port", "--http2-port"]) {
 
 assert.match(xrayFallback, /location \^~ \/api\/fortune/);
 assert.match(xrayFallback, /proxy_pass http:\/\/127\.0\.0\.1:5173/);
+assert.match(xrayFallback, /APP_PATH="\/hays"/);
 
 for (const marker of [
   "inbound_fallbacks",
@@ -84,6 +88,7 @@ for (const marker of [
   "seq 1 30",
   "curl --http1.1",
   "curl --http2-prior-knowledge",
+  "$APP_PATH/",
   "rollback"
 ]) {
   assert.match(xrayFallback, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), `${marker} should be handled by the Xray helper`);
@@ -96,6 +101,14 @@ for (const placeholder of ["__DOMAIN__", "__SITE_ROOT__", "__INDEX_FILE__"]) {
 assert.match(nginx, /gzip on;/);
 assert.match(nginx, /location \^~ \/api\/fortune/);
 assert.match(nginx, /proxy_pass http:\/\/127\.0\.0\.1:5173/);
+assert.match(nginx, /location = \/ \{/);
+assert.match(nginx, /return 302 \/hays\/;/);
+assert.match(nginx, /location = \/hays \{/);
+assert.match(nginx, /return 301 \/hays\/;/);
+assert.match(nginx, /location = \/hays\/ \{/);
+assert.match(nginx, /location \^~ \/hays\/assets\//);
+assert.match(nginx, /location \^~ \/hays\//);
+assert.match(nginx, /rewrite \^\/hays\/\(\.\*\)\$ \/\$1 break;/);
 assert.match(nginx, /proxy_read_timeout 60s/);
 assert.match(nginx, /Cache-Control/);
 assert.match(nginx, /X-Content-Type-Options/);
@@ -123,6 +136,7 @@ for (const documentationMarker of [
   "configure-xray-fallback.sh",
   "8443",
   "8444",
+  "/hays/",
   "/etc/hays0709.env",
   "systemctl status hays0709",
   "server.mjs",

@@ -14,6 +14,7 @@ readonly ENABLED_DIR="/etc/nginx/sites-enabled"
 readonly CONFIG_PATH="${CONFIG_DIR}/${SITE_NAME}.conf"
 readonly ENABLED_LINK="${ENABLED_DIR}/${SITE_NAME}.conf"
 readonly INDEX_FILE="瀚纳仕H5 demo-启动舱.html"
+readonly APP_PATH="/hays"
 readonly TEMPLATE_FILE_NAME="deploy/nginx.conf.template"
 readonly SERVICE_TEMPLATE_FILE_NAME="deploy/hays0709.service.template"
 readonly SERVICE_NAME="${SITE_NAME}.service"
@@ -274,6 +275,7 @@ install_nginx_config() {
         grep -Eq "server_name[[:space:]]+[^;]*${DOMAIN}([[:space:]]|;)" "$CONFIG_PATH" \
             || die "$CONFIG_PATH has a different server_name; resolve it manually before deploying"
         ensure_nginx_api_proxy
+        ensure_nginx_hays_path
         ensure_nginx_site_link
         return
     fi
@@ -330,6 +332,69 @@ PY
         install -m 644 "$backup" "$CONFIG_PATH"
         nginx -t || true
         die "Nginx API proxy upgrade failed validation; restored the previous configuration"
+    fi
+}
+
+ensure_nginx_hays_path() {
+    if grep -Fq "location = ${APP_PATH} {" "$CONFIG_PATH" && grep -Fq "location ^~ ${APP_PATH}/" "$CONFIG_PATH"; then
+        return 0
+    fi
+
+    local candidate="$TMP_ROOT/nginx.conf.with-hays-path"
+    local backup="$APP_ROOT/config-backups/nginx-before-hays-path-$(date -u +%Y%m%d%H%M%S).conf"
+    python3 - "$CONFIG_PATH" "$candidate" "$APP_PATH" "$INDEX_FILE" <<'PY'
+from pathlib import Path
+import sys
+
+source_path, target_path = map(Path, sys.argv[1:3])
+app_path, index_file = sys.argv[3:5]
+source = source_path.read_text(encoding="utf-8")
+old_root = """    location / {
+        try_files $uri $uri/ =404;
+    }
+"""
+path_routes = f"""    location = / {{
+        return 302 {app_path}/;
+    }}
+
+    location = {app_path} {{
+        return 301 {app_path}/;
+    }}
+
+    location = {app_path}/ {{
+        try_files /{index_file} =404;
+    }}
+
+    location ^~ {app_path}/assets/ {{
+        rewrite ^{app_path}/(.*)$ /$1 break;
+        try_files $uri =404;
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800, immutable" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    }}
+
+    location ^~ {app_path}/ {{
+        rewrite ^{app_path}/(.*)$ /$1 break;
+        try_files $uri $uri/ =404;
+    }}
+
+    location / {{
+        return 404;
+    }}
+"""
+
+if old_root not in source:
+    raise SystemExit("managed Nginx config has no legacy root try_files location to replace")
+
+target_path.write_text(source.replace(old_root, path_routes, 1), encoding="utf-8")
+PY
+    cp -a "$CONFIG_PATH" "$backup"
+    install -m 644 "$candidate" "$CONFIG_PATH"
+    if ! nginx -t; then
+        install -m 644 "$backup" "$CONFIG_PATH"
+        nginx -t || true
+        die "Nginx /hays path upgrade failed validation; restored the previous configuration"
     fi
 }
 
@@ -489,7 +554,7 @@ http_health_check() {
         --resolve "$DOMAIN:80:127.0.0.1" \
         --output "$body_file" \
         --write-out '%{http_code}' \
-        "http://$DOMAIN/")" || return 1
+        "http://$DOMAIN$APP_PATH/")" || return 1
 
     if nginx_is_https; then
         [[ "$status" == "301" || "$status" == "308" ]]
@@ -505,7 +570,7 @@ https_health_check() {
         --resolve "$DOMAIN:443:127.0.0.1" \
         --output "$body_file" \
         --write-out '%{http_code}' \
-        "https://$DOMAIN/")" || return 1
+        "https://$DOMAIN$APP_PATH/")" || return 1
     [[ "$status" == "200" ]] && page_marker_check "$body_file"
 }
 
@@ -671,7 +736,7 @@ deploy_release() {
     fi
 
     prune_releases
-    log "deployment complete: https://$DOMAIN/"
+    log "deployment complete: https://$DOMAIN$APP_PATH/"
 }
 
 main() {

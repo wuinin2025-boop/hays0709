@@ -389,16 +389,26 @@ path_routes = f"""    location = / {{
 
 legacy_index = f"try_files /{index_file} =404;"
 quoted_index = f'try_files "/{index_file}" =404;'
+hays_route_marker = f"location = {app_path} {{"
+source_changed = False
 
 if legacy_index in source:
     source = source.replace(legacy_index, quoted_index, 1)
+    source_changed = True
 elif old_root in source:
     source = source.replace(old_root, path_routes, 1)
+    source_changed = True
+elif quoted_index in source and hays_route_marker in source:
+    pass
 else:
     raise SystemExit("managed Nginx config has no legacy root try_files location to replace")
 
 if "absolute_redirect off;" not in source:
     source = source.replace("    charset utf-8;\n", "    charset utf-8;\n    absolute_redirect off;\n", 1)
+    source_changed = True
+
+if not source_changed:
+    raise SystemExit("managed Nginx config already contains the expected /hays route")
 
 target_path.write_text(source, encoding="utf-8")
 PY

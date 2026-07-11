@@ -151,6 +151,16 @@ sudo bash scripts/deploy.sh --domain example.com --rollback
 
 首次部署没有 `previous` 版本，回滚会明确报错，不会删除当前版本。
 
+### 卸载
+
+在服务器上执行以下命令，可停止并移除 `hays0709` 服务、环境文件、Nginx 站点配置和所有已发布版本：
+
+```bash
+sudo bash -c 'systemctl disable --now hays0709.service 2>/dev/null || true; rm -f /etc/systemd/system/hays0709.service /etc/hays0709.env /etc/nginx/sites-enabled/hays0709.conf /etc/nginx/sites-available/hays0709.conf; rm -rf /opt/hays0709; systemctl daemon-reload; nginx -t; systemctl reload nginx'
+```
+
+该命令不会卸载系统共享的 Nginx、Node.js 或 Certbot，也不会删除 TLS 证书。
+
 ### 查看服务状态和日志
 
 ```bash

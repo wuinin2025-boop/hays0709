@@ -4229,6 +4229,8 @@
     let didPrimeDefaultMusic = false;
     let loadingRunId = 0;
     let lastPosterReport;
+    let posterAssetsReport;
+    let pendingPosterAssetsReport;
     let posterRenderRunId = 0;
 
     bgMusic.volume = MUSIC_VOLUME;
@@ -4252,7 +4254,7 @@
       if (id === "posterScreen") {
         playSfx("poster");
         if (lastPosterReport) {
-          refreshPosterAssets(lastPosterReport);
+          ensurePosterAssets(lastPosterReport);
         }
       }
     }
@@ -4822,7 +4824,7 @@
       ].map(([label, value]) => `<div><span>${label}</span><b>${value}</b></div>`).join("");
       document.querySelector("#posterRiskLine").textContent = report.risk;
       lastPosterReport = report;
-      refreshPosterAssets(report);
+      ensurePosterAssets(report);
     }
 
     function renderPosterScene(report) {
@@ -4919,8 +4921,16 @@
       return h5Url.toString();
     }
 
+    function ensurePosterAssets(report) {
+      if (!report) return;
+      if (posterAssetsReport === report || pendingPosterAssetsReport === report) return;
+      refreshPosterAssets(report);
+    }
+
     function refreshPosterAssets(report) {
       const runId = ++posterRenderRunId;
+      pendingPosterAssetsReport = report;
+      posterAssetsReport = undefined;
       posterArea.classList.remove("is-save-ready");
       renderPosterQr()
         .then(() => {
@@ -5043,6 +5053,14 @@
 
         posterSaveImage.src = canvas.toDataURL("image/png");
         posterArea.classList.add("is-save-ready");
+        pendingPosterAssetsReport = undefined;
+        posterAssetsReport = report;
+      }).catch(error => {
+        if (activeRunId === posterRenderRunId) {
+          pendingPosterAssetsReport = undefined;
+          posterAssetsReport = undefined;
+        }
+        throw error;
       });
     }
 
@@ -5842,94 +5860,205 @@
         .replace(/'/g, "&#039;");
     }
 
+    const FALLBACK_PROFILE_NAMES = [
+      "人间搞钱符",
+      "Offer吸铁石",
+      "贵人召唤体",
+      "低调上岸命",
+      "班味净化师",
+      "薪资开光人",
+      "水逆反弹甲",
+      "简历显灵体",
+      "职场显眼包",
+      "摸鱼自救体",
+      "会议幸存者",
+      "老板翻译器",
+      "KPI续命师",
+      "上岸预备役",
+      "机会雷达体",
+      "加班绝缘体"
+    ];
+
+    const FALLBACK_INSIGHTS = {
+      "搞钱开门": [
+        "{period}别只在心里涨薪，先把你的身价写得像真的会发光。",
+        "{period}搞钱窗口开了半扇，别用谦虚把自己挡在门外。",
+        "{period}你的钱包需要一点仪式感：先把成果讲得像成果。",
+        "{period}别等老板读心，涨薪这种事要有证据链和出场音乐。"
+      ],
+      "贵人在线": [
+        "{period}贵人不一定敲锣登场，可能只是认真看你简历的人。",
+        "{period}别把弱关系当空气，风口有时就藏在一句近况里。",
+        "{period}有人愿意拉你一把，但你得先把手伸出来。",
+        "{period}贵人不是 NPC，先给对方一个能接住你的理由。"
+      ],
+      "机会冒头": [
+        "{period}机会在靠近，但它需要一个能找到你的入口。",
+        "{period}机会已经探头了，别用“我再等等”把它劝退。",
+        "{period}你的状态栏该更新了，不然好运只能在门口转圈。",
+        "{period}别装离线，机会最怕找不到你的有效联系方式。"
+      ],
+      "Offer敲门": [
+        "{period}别装随缘，Offer 喜欢有准备又不露怯的人。",
+        "{period}面试不是玄学盲盒，项目故事讲顺就会多一格光。",
+        "{period}Offer 的影子已经出现，别临门一脚开始摆烂。",
+        "{period}把作品和经历摆正，别让 HR 的雷达扫到一片雾。"
+      ],
+      "水逆闪避": [
+        "{period}少硬刚，多留痕，别让一句话把好运吓跑。",
+        "{period}会开完了，锅别自动背，截图和纪要才是护身符。",
+        "{period}水逆不是不让你动，是让你别裸奔式冲刺。",
+        "{period}情绪先放旁边，重要话术建议走可复制粘贴路线。"
+      ],
+      "换局预警": [
+        "{period}不是你矫情，是当前副本可能真的不太旺你。",
+        "{period}如果每天都像开荒，请先确认奖励是不是值得。",
+        "{period}换局不是逃跑，是给自己换一个能刷装备的地图。",
+        "{period}别急着裸辞，先把下个副本的门票攒出来。"
+      ]
+    };
+
+    const FALLBACK_DRAWS = {
+      "搞钱开门": [
+        { name: "钱来不来", oracle: "钱不是不来，是你还没把门牌号写清楚。" },
+        { name: "身价醒醒", oracle: "别把自己报成友情价，你不是公司赠品。" },
+        { name: "钱包开麦", oracle: "它说别只会努力，也要会报价。" },
+        { name: "涨薪有戏", oracle: "先把成果摊开，别让功劳继续隐身。" }
+      ],
+      "贵人在线": [
+        { name: "贵人帮不帮", oracle: "贵人已读不回中，先把你的信号发得更像正事。" },
+        { name: "弱关系发光", oracle: "朋友圈不是许愿池，但近况发对了真能开门。" },
+        { name: "内推雷达", oracle: "让 HR 的雷达响一下，别安静得像未上线。" },
+        { name: "人脉续电", oracle: "一句好久不见，可能比你想象中更有电。" }
+      ],
+      "机会冒头": [
+        { name: "机会动不动", oracle: "有风，但还没吹到门口。先把窗户打开。" },
+        { name: "入口显灵", oracle: "好运不爱猜谜，它喜欢清清楚楚的入口。" },
+        { name: "状态刷新", oracle: "你一更新，机会池就少一次装睡的理由。" },
+        { name: "副本开门", oracle: "新任务已经亮了，别还停在上一章存档点。" }
+      ],
+      "Offer敲门": [
+        { name: "Offer 有影吗", oracle: "影子有了，门铃还没响。别空等，先补弹药。" },
+        { name: "面试开麦", oracle: "把故事讲顺，比临场玄学拜拜更管用。" },
+        { name: "HR 靠近", oracle: "不是幻觉，是你的关键词终于有点像人话了。" },
+        { name: "终面别慌", oracle: "把老板画的饼切成需求文档，气场就稳了。" }
+      ],
+      "水逆闪避": [
+        { name: "水逆别碰我", oracle: "少冲动，多截图。你不是怂，是在保护好运。" },
+        { name: "锅盖护体", oracle: "边界感不是冷漠，是不让锅精准降落。" },
+        { name: "嘴快预警", oracle: "能打字确认的事，先别靠激情口播。" },
+        { name: "避雷上线", oracle: "别硬刚，水逆最爱抓情绪化发言。" }
+      ],
+      "换局预警": [
+        { name: "该不该换局", oracle: "不是每个副本都值得硬刷，换局前先看奖励。" },
+        { name: "副本重开", oracle: "如果越努力越掉血，先看看地图是不是错了。" },
+        { name: "筹码盘点", oracle: "换局前别空手，技能包和作品集都得带上。" },
+        { name: "新局试探", oracle: "先开机会池，不急着把旧船当场凿沉。" }
+      ]
+    };
+
+    const FALLBACK_ACTIONS = {
+      "搞钱开门": [
+        ["简历开光", "身价校准", "别先自降预期"],
+        ["成果上桌", "报价别手软", "把功劳截图"],
+        ["复盘涨幅", "补齐案例", "少说都可以"],
+        ["薪资探路", "亮出筹码", "别做友情价"]
+      ],
+      "贵人在线": [
+        ["弱关系召唤", "发出可聊信号", "别闷声等救"],
+        ["更新近况", "约杯咖啡", "少发纯吐槽"],
+        ["递出关键词", "让对方好转发", "感谢要具体"],
+        ["找前同事聊", "问真实缺口", "别只求内推"]
+      ],
+      "机会冒头": [
+        ["机会试探", "更新状态", "让入口可见"],
+        ["打开作品集", "抛出关键词", "别假装佛系"],
+        ["刷新简历", "投递三家", "观察回音"],
+        ["把目标写明", "同步近况", "少等天降"]
+      ],
+      "Offer敲门": [
+        ["面试弹药补齐", "项目讲顺", "别临场裸奔"],
+        ["准备反问", "复盘亮点", "别背答案"],
+        ["作品排版", "数字说话", "少讲玄学"],
+        ["模拟面试", "整理案例", "稳住语速"]
+      ],
+      "水逆闪避": [
+        ["少口头承诺", "重要信息留痕", "别情绪化裸辞"],
+        ["会后发纪要", "锅别自动背", "先别秒回"],
+        ["边界说清", "保存证据", "少深夜决策"],
+        ["延迟开火", "找人复盘", "避开阴阳怪气"]
+      ],
+      "换局预警": [
+        ["看清奖励", "盘点筹码", "先开机会池"],
+        ["列出底线", "观察权限", "别裸辞冲动"],
+        ["试探新局", "补齐作品", "慢慢撤退"],
+        ["问清预算", "确认老板", "别被饼香迷路"]
+      ]
+    };
+
+    const FALLBACK_RISKS = {
+      "搞钱开门": [
+        "别把薪资涨幅当唯一答案，岗位质量差也会把好运折现成加班。",
+        "别让不好意思替你谈薪。职场不会自动给害羞发奖金。",
+        "别只看钱，也看权限、资源和老板是不是会画真饼。"
+      ],
+      "贵人在线": [
+        "别只转发好运，也要给好运留一个能找到你的入口。",
+        "贵人不是客服，不要一上来就把人生工单全丢过去。",
+        "别把沉默当体面，必要时要让别人知道你正在可合作。"
+      ],
+      "机会冒头": [
+        "别只转发好运，也要给好运留一个能找到你的入口。",
+        "机会不怕你慢，怕你一直说再看看然后资料也不更新。",
+        "别让旧标签锁死你，新机会需要新的自我介绍。"
+      ],
+      "Offer敲门": [
+        "别把面试当背诵比赛，真实案例比漂亮形容词更有用。",
+        "别只准备自我介绍，反问环节才是气场开关。",
+        "别临场才找作品链接，Offer 不爱等你翻聊天记录。"
+      ],
+      "水逆闪避": [
+        "水逆不是让你原地罚站，是提醒你重要沟通别只靠嘴。",
+        "别用一时嘴快换一周补锅，留痕才是成年人的结界。",
+        "别在情绪最高点做职业决定，先睡一觉再开大。"
+      ],
+      "换局预警": [
+        "别把逃离感当成天命。新机会要看老板、资源和真实权限。",
+        "别让焦虑替你选路。先看新局有没有成长和筹码。",
+        "别一边嫌副本烂一边不存档，作品集就是你的传送门。"
+      ]
+    };
+
+    function pickFallbackItem(items, offset = 0) {
+      return items[(birthSeed() + offset) % items.length];
+    }
+
+    function getFallbackThemeItems(collection) {
+      return collection[answers.theme] || collection["机会冒头"];
+    }
+
+    function withPeriod(text) {
+      return text.replaceAll("{period}", answers.period || "本周");
+    }
+
     function createProfile() {
-      const seed = birthSeed();
-      const profiles = [
-        { name: "人间搞钱符" },
-        { name: "Offer吸铁石" },
-        { name: "贵人召唤体" },
-        { name: "低调上岸命" },
-        { name: "班味净化师" },
-        { name: "薪资开光人" },
-        { name: "水逆反弹甲" },
-        { name: "简历显灵体" }
-      ];
-      return profiles[seed % profiles.length];
+      return { name: pickFallbackItem(FALLBACK_PROFILE_NAMES) };
     }
 
     function createSummary() {
-      const period = answers.period || "本周";
-      if (answers.theme === "搞钱开门") {
-        return `${period}别只在心里涨薪，先把你的身价写得像真的会发光。`;
-      }
-      if (answers.theme === "贵人在线") {
-        return `${period}贵人不一定敲锣登场，可能只是认真看你简历的人。`;
-      }
-      if (answers.theme === "Offer敲门") {
-        return `${period}别装随缘，Offer 喜欢有准备又不露怯的人。`;
-      }
-      if (answers.theme === "水逆闪避") {
-        return `${period}少硬刚，多留痕，别让一句话把好运吓跑。`;
-      }
-      if (answers.theme === "换局预警") {
-        return `${period}不是你矫情，是当前副本可能真的不太旺你。`;
-      }
-      return `${period}机会在靠近，但它需要一个能找到你的入口。`;
+      return withPeriod(pickFallbackItem(getFallbackThemeItems(FALLBACK_INSIGHTS), 3));
     }
 
     function createDraw() {
-      const draws = {
-        "搞钱开门": {
-          name: "钱来不来",
-          oracle: "钱不是不来，是你还没把门牌号写清楚。"
-        },
-        "贵人在线": {
-          name: "贵人帮不帮",
-          oracle: "贵人已读不回中，先把你的信号发得更像正事。"
-        },
-        "机会冒头": {
-          name: "机会动不动",
-          oracle: "有风，但还没吹到门口。先把窗户打开。"
-        },
-        "Offer敲门": {
-          name: "Offer 有影吗",
-          oracle: "影子有了，门铃还没响。别空等，先补弹药。"
-        },
-        "水逆闪避": {
-          name: "水逆别碰我",
-          oracle: "少冲动，多截图。你不是怂，是在保护好运。"
-        },
-        "换局预警": {
-          name: "该不该换局",
-          oracle: "不是每个副本都值得硬刷，换局前先看奖励。"
-        }
-      };
-      return draws[answers.theme] || draws["机会冒头"];
+      return pickFallbackItem(getFallbackThemeItems(FALLBACK_DRAWS), 7);
     }
 
     function createActions() {
-      const actionMap = {
-        "搞钱开门": ["简历开光", "身价校准", "别先自降预期"],
-        "贵人在线": ["弱关系召唤", "发出可聊信号", "别闷声等救"],
-        "机会冒头": ["机会试探", "更新状态", "让入口可见"],
-        "Offer敲门": ["面试弹药补齐", "项目讲顺", "别临场裸奔"],
-        "水逆闪避": ["少口头承诺", "重要信息留痕", "别情绪化裸辞"],
-        "换局预警": ["看清奖励", "盘点筹码", "先开机会池"]
-      };
-      return actionMap[answers.theme] || actionMap["机会冒头"];
+      return pickFallbackItem(getFallbackThemeItems(FALLBACK_ACTIONS), 11);
     }
 
     function createRisk() {
-      if (answers.theme === "水逆闪避") {
-        return "水逆不是让你原地罚站，是提醒你重要沟通别只靠嘴。";
-      }
-      if (answers.theme === "换局预警") {
-        return "别把逃离感当成天命。新机会要看老板、资源和真实权限。";
-      }
-      if (answers.theme === "搞钱开门") {
-        return "别把薪资涨幅当唯一答案，岗位质量差也会把好运折现成加班。";
-      }
-      return "别只转发好运，也要给好运留一个能找到你的入口。";
+      return pickFallbackItem(getFallbackThemeItems(FALLBACK_RISKS), 17);
     }
 
     function startLoadingProgress(runId) {

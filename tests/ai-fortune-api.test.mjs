@@ -33,6 +33,16 @@ assert.match(server, /configured: Boolean\(getAiApiKey\(\)\)/, "status route sho
 assert.match(html, /const AI_FORTUNE_ENDPOINT = "\/api\/fortune";/);
 assert.match(html, /const AI_FORTUNE_TIMEOUT_MS = 45000;/);
 assert.match(html, /function createFallbackReport\(\)/);
+assert.match(html, /function pickFallbackItem\(items, offset = 0\)/);
+assert.match(html, /const FALLBACK_PROFILE_NAMES = \[/);
+assert.match(html, /const FALLBACK_INSIGHTS = \{/);
+assert.match(html, /const FALLBACK_DRAWS = \{/);
+assert.match(html, /const FALLBACK_ACTIONS = \{/);
+assert.match(html, /const FALLBACK_RISKS = \{/);
+assert.match(html, /职场显眼包/);
+assert.match(html, /让 HR 的雷达响一下/);
+assert.match(html, /会开完了，锅别自动背/);
+assert.match(html, /把老板画的饼切成需求文档/);
 assert.match(html, /async function requestAiReport/);
 assert.match(html, /function normalizeClientReport/);
 assert.match(html, /function renderReport/);
